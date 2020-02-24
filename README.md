@@ -1,0 +1,115 @@
+# Introduction
+
+There are a number of RPG accessories that allow a GM to build all sorts of things from groups of tables: caverns, catacombs, solar systems, galaxy sectors, names of every description... Now, while it is certainly fun to roll dice it is not always practical and can be time consuming. Hence `gametables`, a Python program that will read in a YAML file containing the specification of group of tables that will be randomly rolled. The output is printed on the command line or sent to a file.
+
+## Installation
+
+```
+$ pip install --upgrade gametables
+```
+
+## Usage
+
+The `gametables` script simply takes one or two arguments: the YAML file containing the data and optionally the output (text) file name:
+
+```
+$ python -m gametables monsters.yaml
+```
+
+Or use the console script:
+
+```
+$ gametables monsters.yaml result.txt
+```
+
+
+## YAML file format
+
+Tables and table groups are stored in a [YAML 1.2 file](https://yaml.org/spec/1.2/spec.html). It must contain at least two keys: 'title', which maps to a string and acts as a reference for the table and 'table' which maps to a sequence of entries. For example:
+
+```
+---
+title: Wandering Monsters
+table:
+-  goblins
+-  orcs
+-  hobgoblins
+```
+
+will 'roll' on the 'tables' section. As there are three entries there is a one in three chance of each one being output. The weighting of an entry can be adjusted by prefixing it with `N* ` where N is the increased weighting. For example:
+
+```
+---
+title: Wandering Monsters
+table:
+-  2* goblins
+-  orcs
+-  hobgoblins
+```
+
+is the same as:
+
+```
+---
+title: Wandering Monsters
+table:
+-  goblins
+-  goblins
+-  orcs
+-  hobgoblins
+```
+
+An entry can also contain a sequence in "flow" style. For example, consider this file:
+
+```
+---
+title: Wandering Monsters
+table:
+-  [skeletons, zombies]
+-  [goblins, hobgoblins]
+```
+
+There is a fifty-fifty chance of choosing the "skeletons, zombies" line, and a fifty-fifty chance of choosing either "skeletons" or "zombies". Flow sequences can also have weights, e.g. `[3* skeletons, zombies]`.
+
+## TODO
+
+-  parse for "1d6+1" etc and roll that 
+
+
+## Full table specification
+
+```
+---
+title: the title of the table, used as ID
+format: wrap * in here, if a single word output an HTML div with this class
+heading: true|false|str    # print out title as heading, or use str as heading
+show: true|false     # if false then table can be referenced but will not be printed
+order: 1             # order tables will be printed out, default is order in file
+newline: true|false  # output newline after printing, default is true
+table:
+-  goblins
+-  goblins
+-  orcs
+-  hobgoblins
+```
+
+
+## Development notes
+
+### Unit testing
+
+A small number of tests are included in the `test_gametables.py` file and can be run using the [pytest](https://pypi.org/project/pytest/) application.
+
+### Packaging a distribution
+
+When ready for a release use the [bumpversion](https://pypi.org/project/bumpversion/) application to update the version number, e.g.
+
+```
+$ bumpversion major --tag
+```
+
+This will update the source file and the setup configuration. Then build the distribution:
+
+```
+$ python setup.py bdist_wheel
+```
