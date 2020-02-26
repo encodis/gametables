@@ -81,13 +81,12 @@ There is a fifty-fifty chance of choosing the "skeletons, zombies" line, and a f
 ```
 ---
 title: the title of the table, used as ID
-format: wrap 'foo {} bar' in here, if a single word output an HTML div with this class
+format: prefix ^ suffix  # wrap 'foo {} bar' in here, if a single word output an HTML div with this class
 template: a template file or string? multiline?
 heading: true|false|str    # print out title as heading, or use str as heading
-show: true|false     # if false then table can be referenced but will not be printed
+show: true|false     # if false then table can be referenced but will not be printed, only applies at top level
 order: 1             # order tables will be printed out, default is order in file
-newline: true|false  # output newline after printing, default is true
-prefix: Area (for example)
+newline: true|false  # output newline after printing, default is true could also be number of newlines, 0, 1, 2 etc
 repeat: number of time to repeat this table - might be 1d6 etc. ??? need to populate X zone, for example
 table:   # if only 1 thing in table acts as a line, e.g. other text
 -  goblins

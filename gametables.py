@@ -58,22 +58,19 @@ def choose_entry_from_table(table):
     if isinstance(table, dict) and 'table' in table:
         # table, dict with 'table' element
         select = table['table']
-        end = '\n' if table.get('newline', True) else ''
     elif isinstance(table, list):
         # list, or inline sequence
         select = table
-        end = ''
     elif isinstance(table, re.Match):
         # string, link to table in TABLE_GROUP
         if table.group(1) in TABLE_GROUP:
             select = TABLE_GROUP[table.group(1)]['table']
-            end = '\n' if TABLE_GROUP[table.group(1)].get('newline', True) else ''
     else:
         # unknown return empty string to stop
         return ''
 
     # get table weights
-    weight_re = r'(\d+)\*\s([\w\s]+)'
+    weight_re = r'(\d+)\*\s([\w\s\^]+)'
 
     weights = get_table_weights(table)
 
@@ -86,9 +83,7 @@ def choose_entry_from_table(table):
 
     # remove weight from choice, if present
     if (m := re.match(weight_re, choice)):
-        choice = m.group(2) + end
-    else:
-        choice = choice + end
+        choice = m.group(2)
 
     # follow table links
     links_re = r'\^([\w\s]+)\^'
@@ -96,12 +91,12 @@ def choose_entry_from_table(table):
     choice = re.sub(links_re, choose_entry_from_table, choice)
  
     # replace die rolls
-    dice_re = r'~(\d+)d(\d+)([-+*]\d+)*'
+    dice_re = r'~(\d+)[dD](\d+)([-+*]\d+)*'
     
     choice = re.sub(dice_re, dice_roll, choice)
     
     # returned cleaned up string
-    return choice.replace('_', '').strip(' ')
+    return choice.replace('_', '')
 
 
 def dice_roll(die):
@@ -154,6 +149,12 @@ def make_valid_table(table):
     else:
         table['order'] = 1
 
+    if 'newline' in table:
+        if not isinstance(table['newline'], bool):
+            table['newline'] = False
+    else:
+        table['newline'] = True
+    
     if 'heading' in table:
         if isinstance(table['heading'], bool):
             if table['heading']:
@@ -162,6 +163,15 @@ def make_valid_table(table):
                 table['heading'] = ''
     else:
         table['heading'] = ''         
+    
+    if 'format' in table:
+        if isinstance(table['format'], str):
+            if '^' not in table['format']:
+                table['format'] += ' ^'
+        else:
+            table['format'] = '^'    
+    else:
+        table['format'] = '^'
     
     if 'repeat' in table:
         if not isinstance(table['repeat'], int):
@@ -181,15 +191,17 @@ def prepare_tables(tables):
 
     for table in tables:
         if not make_valid_table(table):
-            return None
+            return False
         
     for table in sorted(tables, key=lambda x: x['order']):
     
         if table['title'] in TABLE_GROUP:
             print(f'error duplicate title: {table["title"]}')
-            return None
+            return False
         
         TABLE_GROUP[table['title']] = table
+
+    return True
         
     
 def gametables(source, target):
@@ -198,7 +210,9 @@ def gametables(source, target):
     with open(source, 'r', encoding="utf8") as s:
         tables = [t for t in yaml.safe_load_all(s)]
 
-    prepare_tables(tables)
+    if not prepare_tables(tables):
+        print('Table format error')
+        exit()
 
     t = open(target, 'w', encoding='utf8') if target else sys.stdout
 
@@ -210,17 +224,29 @@ def gametables(source, target):
         global TABLE_RECURSION_COUNT
         TABLE_RECURSION_COUNT = 0
         
+        # replace with function that gathers together the output for a table
+        # then can use this for linked tables...
+        
         for _ in range(TABLE_GROUP[table]['repeat']):
 
             if not TABLE_GROUP[table]['show']:
                 continue
         
-            result = choose_entry_from_table(TABLE_GROUP[table])
-        
             if TABLE_GROUP[table]['heading']:
-                result = TABLE_GROUP[table]['heading'] + '\n' + result
+                result = TABLE_GROUP[table]['heading'] + '\n'
+            else:
+                result = ''
+                
+            result += choose_entry_from_table(TABLE_GROUP[table])
+        
+            result = TABLE_GROUP[table]['format'].replace('^', result, 1)
+        
+            end = '\n' if TABLE_GROUP[table]['newline'] else ''
+            
+            result += end
   
-            t.write(result)
+            # write tidied up result
+            t.write(result.strip(' '))
 
     if t is not sys.stdout:
         t.close()

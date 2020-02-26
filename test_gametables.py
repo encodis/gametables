@@ -76,8 +76,7 @@ table:
     assert os.path.exists(out_file)
 
     # assert contents of output file is one of two parts
-    expect = ['part 1', 'part 2']
-
+    expect = ['part 1\n', 'part 2\n']
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()
@@ -102,7 +101,7 @@ table:
     assert os.path.exists(out_file)
 
     # assert contents of output file is one of two parts
-    expect = ['part 1', 'part 2']
+    expect = ['part 1\n', 'part 2\n']
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()
@@ -277,6 +276,58 @@ table:
     assert actual == expect
 
 
+def test_gamecards_format_default(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test
+format: foo
+table:
+-  line 1
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has default format
+    expect = 'foo line 1\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
+def test_gamecards_format(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test
+format: foo ^ bar
+table:
+-  line 1
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has specified format
+    expect = 'foo line 1 bar\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
 def test_gamecards_heading_alt(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
@@ -372,6 +423,47 @@ table:
         actual = fh.read()
 
     assert actual == expect
+
+
+def test_gamecards_link_weighted(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test1
+newline: false
+table:
+- 2* ^test2^
+- 2* ^test 3^
+...
+---
+title: test2
+show: false
+newline: false
+table:
+-  line 2
+...
+---
+title: test 3
+show: false
+newline: false
+table:
+-  line 3
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has contents from two linked tables
+    expect = ['line 2', 'line 3']
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
 
 
 def test_gamecards_link_nested(tmpdir):
@@ -491,6 +583,7 @@ def test_gamecards_link_inline(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 title: test1
+newline: false
 table:
 -  ['^test2^', '^test3^']
 ...
@@ -660,6 +753,7 @@ def test_gamecards_dice_inline_list(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 title: test
+newline: false
 table:
 -  [~1d6, ~1d6]
 ''')
