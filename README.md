@@ -74,6 +74,40 @@ There is a fifty-fifty chance of choosing the "skeletons, zombies" line, and a f
 ## TODO
 
 -  parse for "1d6+1" etc and roll that 
+- if you had dataclasses you could make them up on the fly from an inline sequence!!!!
+
+if you could have a metadata "variable: foo=5' in one table then
+'repeat: $foo$' in another?
+
+or even 
+
+table:
+-  This is line 1 $foo=3$
+-  This is line 2 $foo=4$
+
+.
+.
+.
+
+---
+repeat: $foo$
+table:
+
+when retrieving results, check for variable pattern, allocate to dict and remove
+when prepping tables, allow pattern as well as str/int etc
+when about to do anything with a table make a COPY, replace the var, do it
+
+also: have a variables metadata entry that can be used explicitly - need this if table has show=false
+
+maybe replace dice with $1d6$? or links?  if $xxx$ does not resolve to a dice roll, or a link (table title), or a variable then blank
+
+if you did random first could have $foo=$1d6+1$$ or if links were also last ^table_$foo$^
+
+vars with dice roll on the 'variables' metadata will be evaluated at load time - but that might not matter
+
+or a field that says "set this variable to the result of the table"...
+
+can replace in heading and repeat too, but repeat should be an int. maybe format too, but only vars and dice, not links
 
 
 ## Full table specification

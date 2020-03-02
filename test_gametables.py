@@ -6,6 +6,8 @@ import pytest
 
 from gametables import gametables
 
+# TODO check for duplicate titles etc
+
 
 def test_gamecards(tmpdir):
 
@@ -539,6 +541,40 @@ table:
     assert actual == expect
 
 
+def test_gamecards_link_inline_repeat(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test1
+newline: false
+table:
+-  ^test2^
+...
+---
+title: test2
+show: false
+repeat: 2
+newline: true
+table:
+-  line 2
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has contents from two linked tables
+    expect = 'line 2\nline 2\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
 def test_gamecards_link_loop(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
@@ -625,7 +661,7 @@ def test_gamecards_dice(tmpdir):
 title: test
 newline: false
 table:
--  ~1d6
+-  $1d6$
 ''')
     
     out_file = tmpdir.join('tables.txt')
@@ -651,7 +687,7 @@ def test_gamecards_dice_multiple(tmpdir):
 title: test
 newline: false
 table:
--  ~1d2 and ~1d2
+-  $1d2$ and $1d2$
 ''')
     
     out_file = tmpdir.join('tables.txt')
@@ -677,7 +713,7 @@ def test_gamecards_dice_plus(tmpdir):
 title: test
 newline: false
 table:
--  ~1d6+1
+-  $1d6+1$
 ''')
     
     out_file = tmpdir.join('tables.txt')
@@ -703,7 +739,7 @@ def test_gamecards_dice_minus(tmpdir):
 title: test
 newline: false
 table:
--  ~1d6-1
+-  $1d6-1$
 ''')
     
     out_file = tmpdir.join('tables.txt')
@@ -729,7 +765,7 @@ def test_gamecards_dice_multiply(tmpdir):
 title: test
 newline: false
 table:
--  ~1d3*2
+-  $1d3*2$
 ''')
     
     out_file = tmpdir.join('tables.txt')
@@ -755,7 +791,7 @@ def test_gamecards_dice_inline_list(tmpdir):
 title: test
 newline: false
 table:
--  [~1d6, ~1d6]
+-  [$1d6$, $1d6$]
 ''')
     
     out_file = tmpdir.join('tables.txt')
@@ -767,6 +803,183 @@ table:
 
     # assert contents of output file in range of dice with multiple ref on line
     expect = '123456'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
+def test_gamecards_vars(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test1
+newline: false
+table:
+-  $foo=bar$ Line ^test2^
+...
+---
+title: test2
+newline: false
+show: false
+table:
+-  Foo = $foo$
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = 'Line Foo = bar'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
+def test_gamecards_vars_metadata(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test1
+show: false
+variables: $foo=1$ $bar=2$
+table:
+-  N/A
+...
+---
+title: test2
+newline: false
+table:
+-  Foo = $foo$, Bar = $bar$
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = 'Foo = 1, Bar = 2'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
+def test_gamecards_vars_repeat(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test1
+table:
+-  Line 1 $foo=2$
+...
+---
+title: test2
+repeat: $foo$
+table:
+-  Line 2
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = 'Line 1 \nLine 2\nLine 2\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
+def test_gamecards_vars_link(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test1
+variables: $foo=2$
+table:
+-  Line 1 ^test$foo$^
+...
+---
+title: test2
+show: false
+newline: false
+table:
+-  Line 2
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = 'Line 1 Line 2\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+def test_gamecards_vars_dice(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+title: test0
+variables: $foo=$1d3$$
+newline: false
+table:
+-  ^test$foo$^
+...
+---
+title: test1
+newline: false
+show: false
+table:
+-  Line 1
+...
+---
+title: test2
+newline: false
+show: false
+table:
+-  Line 2
+...
+---
+title: test3
+newline: false
+show: false
+table:
+-  Line 3
+''')
+    
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = ['Line 1', 'Line 2', 'Line 3']
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()

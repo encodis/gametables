@@ -18,6 +18,8 @@ __version__ = '0.0.1'
 TABLE_GROUP = {}
 TABLE_RECURSION_COUNT = 0
 
+VARIABLES = {}
+
 MAX_TABLE_RECURSION = 20
 
 
@@ -45,17 +47,56 @@ def get_table_weights(table):
     return weights
 
 
-def choose_entry_from_table(table):
+def all_results_from_table(table):
+    
+    global TABLE_GROUP
+    result = ''
+
+    if isinstance(table, re.Match):
+        if table.group(1) in TABLE_GROUP:
+            table = TABLE_GROUP[table.group(1)]
+        else:
+            # unknown return empty string to stop
+            return ''
+
+    # work out repeat, from var if required
+    repeat = table['repeat']
+
+    vget_re = r'\$(\w+)\$'
+
+    repeat = re.sub(vget_re, get_variable, str(repeat))
+
+    try:
+        repeat = int(repeat)
+    except ValueError:
+        repeat = 1
+
+
+    for _ in range(repeat):
+
+        result += table['format'].replace('^', result_from_table(table), 1)
+
+        end = '\n' if table['newline'] else ''
+
+        result += end
+
+    if table['heading']:
+        result = table['heading'] + '\n' + result
+
+    return result.strip(' ')
+
+
+def result_from_table(table):
     '''expecting either a dist with 'table' key, a plain list or an RE match object
     '''
-    
+
     global TABLE_RECURSION_COUNT
     TABLE_RECURSION_COUNT += 1
-            
+
     if TABLE_RECURSION_COUNT > MAX_TABLE_RECURSION:
         return ''
-    
-    if isinstance(table, dict) and 'table' in table:
+
+    if isinstance(table, dict):
         # table, dict with 'table' element
         select = table['table']
     elif isinstance(table, list):
@@ -70,7 +111,8 @@ def choose_entry_from_table(table):
         return ''
 
     # get table weights
-    weight_re = r'(\d+)\*\s([\w\s\^]+)'
+    # TODO should be ^(\d+)\*\s.* ???
+    weight_re = r'(\d+)\*\s(.+)'
 
     weights = get_table_weights(table)
 
@@ -79,49 +121,69 @@ def choose_entry_from_table(table):
 
     # if a list has been picked, re-choose from that list
     if isinstance(choice, list):
-        return choose_entry_from_table(choice)
+        return result_from_table(choice)
 
     # remove weight from choice, if present
     if (m := re.match(weight_re, choice)):
         choice = m.group(2)
 
+    # replace die rolls
+    dice_re = r'\$(\d+)[dD](\d+)([-+*]\d+)*\$'
+    choice = re.sub(dice_re, dice_roll, choice)
+
+    # set vars, remove expression
+    vset_re = r'\$(\w+)=(\w+)\$'
+    choice = re.sub(vset_re, set_variable, choice)
+
+    # get a variable if set, and remove
+    vget_re = r'\$(\w+)\$'
+    choice = re.sub(vget_re, get_variable, choice)
+
     # follow table links
     links_re = r'\^([\w\s]+)\^'
+    choice = re.sub(links_re, all_results_from_table, choice)
 
-    choice = re.sub(links_re, choose_entry_from_table, choice)
- 
-    # replace die rolls
-    dice_re = r'~(\d+)[dD](\d+)([-+*]\d+)*'
-    
-    choice = re.sub(dice_re, dice_roll, choice)
-    
     # returned cleaned up string
     return choice.replace('_', '')
 
 
 def dice_roll(die):
     # 'die' is a match object
-    
+
     number = die.group(1)
     sides = die.group(2)
     modifier = die.group(3)
-        
+
     total = 0
-    
+
     for _ in range(int(number)):
         total += random.randint(1, int(sides))
 
     if modifier:
         value = int(modifier[1:])
-        
+
         if modifier.startswith('+'):
             total += value
         elif modifier.startswith('-'):
             total -= value
         elif modifier.startswith('*'):
             total *= value
-        
+
     return str(total)
+
+
+def set_variable(var):
+    # var is a match object
+    # set var
+    VARIABLES[var.group(1)] = var.group(2)
+    
+    # return empty string
+    return ''
+
+def get_variable(var):
+    # var is match object
+    
+    return VARIABLES.get(var.group(1), '')
 
 
 def make_valid_table(table):
@@ -154,7 +216,7 @@ def make_valid_table(table):
             table['newline'] = False
     else:
         table['newline'] = True
-    
+
     if 'heading' in table:
         if isinstance(table['heading'], bool):
             if table['heading']:
@@ -163,7 +225,7 @@ def make_valid_table(table):
                 table['heading'] = ''
     else:
         table['heading'] = ''         
-    
+
     if 'format' in table:
         if isinstance(table['format'], str):
             if '^' not in table['format']:
@@ -172,12 +234,18 @@ def make_valid_table(table):
             table['format'] = '^'    
     else:
         table['format'] = '^'
-    
-    if 'repeat' in table:
-        if not isinstance(table['repeat'], int):
-            table['repeat'] = 1
-    else:
+
+    if 'repeat' not in table:
         table['repeat'] = 1
+
+    if 'variables' in table:
+        # evaluate dice roll in variables
+        dice_re = r'\$(\d+)[dD](\d+)([-+*]\d+)*\$'
+        table['variables'] = re.sub(dice_re, dice_roll, table['variables'])
+
+        # set variables        
+        vset_re = r'\$(\w+)=(\w+)\$'
+        re.sub(vset_re, set_variable, table['variables'])
 
     return True
 
@@ -185,25 +253,25 @@ def make_valid_table(table):
 def prepare_tables(tables):
     '''convert list of tables from YAML file into TABLES dict
     '''
-    
+
     global TABLE_GROUP
     TABLE_GROUP = {}
 
     for table in tables:
         if not make_valid_table(table):
             return False
-        
+
     for table in sorted(tables, key=lambda x: x['order']):
-    
+
         if table['title'] in TABLE_GROUP:
             print(f'error duplicate title: {table["title"]}')
             return False
-        
+
         TABLE_GROUP[table['title']] = table
 
     return True
-        
-    
+
+
 def gametables(source, target):
 
     # read table file
@@ -220,33 +288,17 @@ def gametables(source, target):
     global TABLE_GROUP
 
     for _, table in enumerate(TABLE_GROUP):
-        
+
         global TABLE_RECURSION_COUNT
         TABLE_RECURSION_COUNT = 0
-        
-        # replace with function that gathers together the output for a table
-        # then can use this for linked tables...
-        
-        for _ in range(TABLE_GROUP[table]['repeat']):
 
-            if not TABLE_GROUP[table]['show']:
-                continue
-        
-            if TABLE_GROUP[table]['heading']:
-                result = TABLE_GROUP[table]['heading'] + '\n'
-            else:
-                result = ''
-                
-            result += choose_entry_from_table(TABLE_GROUP[table])
-        
-            result = TABLE_GROUP[table]['format'].replace('^', result, 1)
-        
-            end = '\n' if TABLE_GROUP[table]['newline'] else ''
-            
-            result += end
-  
-            # write tidied up result
-            t.write(result.strip(' '))
+        if not TABLE_GROUP[table]['show']:
+            continue
+
+        result = all_results_from_table(TABLE_GROUP[table])
+
+        # write result
+        t.write(result)
 
     if t is not sys.stdout:
         t.close()
