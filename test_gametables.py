@@ -13,12 +13,12 @@ def test_gamecards(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 table:
--  line 1
+-  3* line 1
 -  line 2
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -27,24 +27,23 @@ table:
     assert os.path.exists(out_file)
 
     # assert contents of output file is one of two lines
-    expect1 = 'line 1\n'
-    expect2 = 'line 2\n'
+    expect = ['line 1\n', 'line 2\n']
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()
 
-    assert actual in [expect1, expect2]
-    
+    assert actual in expect
+
 
 def test_gamecards_single(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 table:
 -  line 1
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -65,11 +64,11 @@ def test_gamecards_inline(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 table:
 -  ['part 1', 'part 2']
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -90,11 +89,11 @@ def test_gamecards_inline_weighted(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 table:
 -  ['3* part 1', 'part 2']
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -115,34 +114,33 @@ def test_gamecards_stdout(tmpdir, capsys):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  line 1
 -  line 2
 ''')
-    
+
     gametables(yaml_file, '')
 
     # assert contents of output file is one of two lines to stdout
-    expect1 = 'line 1'
-    expect2 = 'line 2'
+    expect = ['line 1', 'line 2']
 
     captured = capsys.readouterr()
 
-    assert captured.out in [expect1, expect2]
+    assert captured.out in expect
 
 
 def test_gamecards_two(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  line 1
 ...
 ---
-title: test2
+name: test2
 table:
 -  line 2
 ''')
@@ -167,13 +165,13 @@ def test_gamecards_order(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 order: 2
 table:
 -  line 1
 ...
 ---
-title: test2
+name: test2
 order: 1
 table:
 -  line 2
@@ -199,7 +197,7 @@ def test_gamecards_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 repeat: 2
 table:
 -  line 1
@@ -225,12 +223,12 @@ def test_gamecards_hide_one(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  line 1
 ...
 ---
-title: test2
+name: test2
 show: false
 table:
 -  line 2
@@ -256,12 +254,12 @@ def test_gamecards_heading(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 heading: true
 table:
 -  line 1
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -282,12 +280,12 @@ def test_gamecards_format_default(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 format: foo
 table:
 -  line 1
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -308,12 +306,12 @@ def test_gamecards_format(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 format: foo ^ bar
 table:
 -  line 1
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -334,12 +332,12 @@ def test_gamecards_heading_alt(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 heading: foo
 table:
 -  line 1
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -360,18 +358,18 @@ def test_gamecards_link(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  ^test2^
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  line 2
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -392,25 +390,25 @@ def test_gamecards_link_two(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  This is ^test2^ and ^test 3^ testing
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  line 2
 ...
 ---
-title: test 3
+name: test 3
 show: false
 newline: false
 table:
 -  line 3
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -431,27 +429,27 @@ def test_gamecards_link_weighted(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 newline: false
 table:
 - 2* ^test2^
 - 2* ^test 3^
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  line 2
 ...
 ---
-title: test 3
+name: test 3
 show: false
 newline: false
 table:
 -  line 3
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -472,25 +470,25 @@ def test_gamecards_link_nested(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  This is ^test2^
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  ^test 3^
 ...
 ---
-title: test 3
+name: test 3
 show: false
 newline: false
 table:
 -  line 3
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -512,19 +510,19 @@ def test_gamecards_link_no_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  This is ^test2^ and ^test2^
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  line 1
 -  line 2
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -545,20 +543,20 @@ def test_gamecards_link_inline_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 newline: false
 table:
 -  ^test2^
 ...
 ---
-title: test2
+name: test2
 show: false
 repeat: 2
 newline: true
 table:
 -  line 2
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -579,25 +577,25 @@ def test_gamecards_link_loop(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  This is ^test2^
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  ^test 3^
 ...
 ---
-title: test 3
+name: test 3
 show: false
 newline: false
 table:
 -  ^test2^
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -618,26 +616,26 @@ def test_gamecards_link_inline(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 newline: false
 table:
 -  ['^test2^', '^test3^']
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  line 2
 ...
 ---
-title: test3
+name: test3
 show: false
 newline: false
 table:
 -  line 3
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -658,12 +656,12 @@ def test_gamecards_dice(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  $1d6$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -684,12 +682,12 @@ def test_gamecards_dice_multiple(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  $1d2$ and $1d2$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -710,12 +708,12 @@ def test_gamecards_dice_plus(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  $1d6+1$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -736,12 +734,12 @@ def test_gamecards_dice_minus(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  $1d6-1$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -762,12 +760,12 @@ def test_gamecards_dice_multiply(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  $1d3*2$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -788,12 +786,12 @@ def test_gamecards_dice_inline_list(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test
+name: test
 newline: false
 table:
 -  [$1d6$, $1d6$]
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -814,19 +812,19 @@ def test_gamecards_vars(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 newline: false
 table:
 -  $foo=bar$ Line ^test2^
 ...
 ---
-title: test2
+name: test2
 newline: false
 show: false
 table:
 -  Foo = $foo$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -847,19 +845,19 @@ def test_gamecards_vars_metadata(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 show: false
-variables: $foo=1$ $bar=2$
+vars: $foo=1$ $bar=2$
 table:
 -  N/A
 ...
 ---
-title: test2
+name: test2
 newline: false
 table:
 -  Foo = $foo$, Bar = $bar$
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -880,17 +878,17 @@ def test_gamecards_vars_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 table:
 -  Line 1 $foo=2$
 ...
 ---
-title: test2
+name: test2
 repeat: $foo$
 table:
 -  Line 2
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -911,19 +909,19 @@ def test_gamecards_vars_link(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test1
+name: test1
 variables: $foo=2$
 table:
 -  Line 1 ^test$foo$^
 ...
 ---
-title: test2
+name: test2
 show: false
 newline: false
 table:
 -  Line 2
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)
@@ -943,34 +941,34 @@ def test_gamecards_vars_dice(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
-title: test0
+name: test0
 variables: $foo=$1d3$$
 newline: false
 table:
 -  ^test$foo$^
 ...
 ---
-title: test1
+name: test1
 newline: false
 show: false
 table:
 -  Line 1
 ...
 ---
-title: test2
+name: test2
 newline: false
 show: false
 table:
 -  Line 2
 ...
 ---
-title: test3
+name: test3
 newline: false
 show: false
 table:
 -  Line 3
 ''')
-    
+
     out_file = tmpdir.join('tables.txt')
 
     gametables(yaml_file, out_file)

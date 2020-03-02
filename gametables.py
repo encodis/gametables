@@ -9,149 +9,166 @@ import argparse
 import sys
 import re
 import random
+import math
+
+from dataclasses import dataclass, field
+from typing import ClassVar, Any, List, Dict, Union
+
 import yaml
 
 
 __version__ = '0.0.1'
 
 
-GAMETABLES = {}
-VARIABLES = {}
+@dataclass
+class GameTable:
+    name: str
+    table: List[Union[str, list]]
+    show: bool = True
+    order: int = 1
+    newline: bool = True
+    heading: Union[bool, str] = False
+    format: str = '^'
+    repeat: Union[int, str] = 1
+    vars: str = ''
+    _weights: List[str] = field(default_factory=list)
+    _visits: int = 0
 
-TABLE_RECURSION_COUNT = 0
-MAX_TABLE_RECURSION = 20
+    database: ClassVar[Dict[str, Any]] = {}
+    variable: ClassVar[Dict[str, str]] = {}
 
+    dice_re: ClassVar[str] = r'\$(\d+)[dD](\d+)([-+*]\d+)*\$'
+    weight_re: ClassVar[str] = r'(\d+)\*\s(.+)'
+    setvar_re: ClassVar[str] = r'\$(\w+)=(\w+)\$'
+    getvar_re: ClassVar[str] = r'\$(\w+)\$'
+    links_re: ClassVar[str] = r'\^([\w\s]+)\^'
 
-def get_table_weights(table):
-    if isinstance(table, dict) and 'table' in table:
-        select = table['table']
-    elif isinstance(table, list):
-        select = table
-    else:
-        return None
+    def __post_init__(self):
+        if isinstance(self.heading, bool) and self.heading:
+            self.heading = self.name
 
-    weight_re = r'(\d+)\*\s([\w\s]+)'
+        if '^' not in self.format:
+            self.format += ' ^'
 
-    weights = []
+        self._weights = [self.get_weight(entry) for entry in self.table]
+        self.table = [self.del_weight(entry) for entry in self.table]
 
-    for s in select:
-        if isinstance(s, str):
-            if m := re.match(weight_re, s):
-                weights.append(int(m.group(1)))
-            else:
-                weights.append(1)
+        # set variables, if any, evaluating dice rolls first
+        self.vars = re.sub(GameTable.dice_re, roll_dice, self.vars)
+
+        re.sub(GameTable.setvar_re, self.set_variable, self.vars)
+
+        # add to database of all tables
+        GameTable.database[self.name] = self
+
+    def result(self):
+        '''Return result from a table
+        '''
+
+        if isinstance(self.repeat, str):
+            repeat = int(re.sub(GameTable.getvar_re, self.get_variable, self.repeat))
         else:
-            weights.append(1)
+            repeat = self.repeat
 
-    return weights
+        result = ''
 
+        for _ in range(repeat):
+            result += self.format.replace('^', self.choose(), 1)
+            result += '\n' if self.newline else ''
 
-def all_results_from_table(table):
+        if self.heading:
+            result = self.heading + '\n' + result
 
-    global GAMETABLES
-    result = ''
+        return result.strip(' ')
 
-    if isinstance(table, re.Match):
-        if table.group(1) in GAMETABLES:
-            table = GAMETABLES[table.group(1)]
-        else:
-            # unknown return empty string to stop
+    def choose(self):
+        '''Choose an item from the table, using weights, follow links, resolve vars/dice etc
+        '''
+
+        # check for too deep recursion
+        self._visits += 1
+
+        if self._visits > 20:
             return ''
 
-    # work out repeat, from var if required
-    repeat = table['repeat']
+        # select random entry from table
+        choice = random.choices(self.table, weights=self._weights)[0]
 
-    vget_re = r'\$(\w+)\$'
+        # if a list has been picked, re-choose from that list
+        if isinstance(choice, list):
+            # make temp GameTable
+            table = GameTable('_', choice)
+            return table.choose()
 
-    repeat = re.sub(vget_re, get_variable, str(repeat))
+        # replace die rolls
+        choice = re.sub(GameTable.dice_re, roll_dice, choice)
 
-    try:
-        repeat = int(repeat)
-    except ValueError:
-        repeat = 1
+        # set vars, remove expression
+        choice = re.sub(GameTable.setvar_re, self.set_variable, choice)
+
+        # get a variable if set, and remove
+        choice = re.sub(GameTable.getvar_re, self.get_variable, choice)
+
+        # follow table links
+        for link in re.findall(GameTable.links_re, choice):
+            if link in GameTable.database:
+                choice = choice.replace('^' + link + '^', GameTable.database[link].result(), 1)
+
+        # returned cleaned up string
+        return choice.replace('_', '')
+
+    @classmethod
+    def sort(cls):
+        cls.database = {k: v for k, v in sorted(cls.database.items(), key=lambda item: item[1].order)}
+
+    @classmethod
+    def get_weight(cls, entry):
+        '''extract weight from a table entry
+        '''
+        if isinstance(entry, str):
+            if m := re.match(cls.weight_re, entry):
+                return int(m.group(1))
+            else:
+                return 1
+        else:
+            return 1
+
+    @classmethod
+    def del_weight(cls,  entry):
+        '''remove weight from a table entry
+        '''
+        if isinstance(entry, str):
+            if m := re.match(cls.weight_re, entry):
+                return m.group(2)
+            else:
+                return entry
+        else:
+            return entry
+
+    @classmethod
+    def set_variable(cls, var):
+        '''set a variable
+        '''
+        # var is match object
+        cls.variable[var.group(1)] = var.group(2)
+
+        # return empty string
+        return ''
+
+    @classmethod
+    def get_variable(cls, var):
+        '''get a variable, return empty string if not found
+        '''
+        # var is match object
+
+        return cls.variable.get(var.group(1), '')
 
 
-    for _ in range(repeat):
-
-        result += table['format'].replace('^', result_from_table(table), 1)
-
-        end = '\n' if table['newline'] else ''
-
-        result += end
-
-    if table['heading']:
-        result = table['heading'] + '\n' + result
-
-    return result.strip(' ')
-
-
-def result_from_table(table):
-    '''expecting either a dist with 'table' key, a plain list or an RE match object
+def roll_dice(dice):
+    '''roll a dice expression
     '''
 
-    global TABLE_RECURSION_COUNT
-    TABLE_RECURSION_COUNT += 1
-
-    if TABLE_RECURSION_COUNT > MAX_TABLE_RECURSION:
-        return ''
-
-    if isinstance(table, dict):
-        # table, dict with 'table' element
-        select = table['table']
-    elif isinstance(table, list):
-        # list, or inline sequence
-        select = table
-    elif isinstance(table, re.Match):
-        # string, link to table in GAMETABLES
-        if table.group(1) in GAMETABLES:
-            select = GAMETABLES[table.group(1)]['table']
-    else:
-        # unknown return empty string to stop
-        return ''
-
-    # get table weights
-    # TODO should be ^(\d+)\*\s.* ???
-    weight_re = r'(\d+)\*\s(.+)'
-
-    weights = get_table_weights(table)
-
-    # select random entry from table
-    choice = random.choices(select, weights=weights)[0]
-
-    # if a list has been picked, re-choose from that list
-    if isinstance(choice, list):
-        return result_from_table(choice)
-
-    # remove weight from choice, if present
-    if (m := re.match(weight_re, choice)):
-        choice = m.group(2)
-
-    # replace die rolls
-    dice_re = r'\$(\d+)[dD](\d+)([-+*]\d+)*\$'
-    choice = re.sub(dice_re, dice_roll, choice)
-
-    # set vars, remove expression
-    vset_re = r'\$(\w+)=(\w+)\$'
-    choice = re.sub(vset_re, set_variable, choice)
-
-    # get a variable if set, and remove
-    vget_re = r'\$(\w+)\$'
-    choice = re.sub(vget_re, get_variable, choice)
-
-    # follow table links
-    links_re = r'\^([\w\s]+)\^'
-    choice = re.sub(links_re, all_results_from_table, choice)
-
-    # returned cleaned up string
-    return choice.replace('_', '')
-
-
-def dice_roll(die):
-    # 'die' is a match object
-
-    number = die.group(1)
-    sides = die.group(2)
-    modifier = die.group(3)
+    number, sides, modifier = dice.groups('')
 
     total = 0
 
@@ -167,136 +184,40 @@ def dice_roll(die):
             total -= value
         elif modifier.startswith('*'):
             total *= value
+        elif modifier.startswith('/'):
+            total = math.trunc(total/value)
 
     return str(total)
 
 
-def set_variable(var):
-    # var is a match object
-    # set var
-    VARIABLES[var.group(1)] = var.group(2)
-    
-    # return empty string
-    return ''
-
-def get_variable(var):
-    # var is match object
-    
-    return VARIABLES.get(var.group(1), '')
-
-
-def make_valid_table(table):
-    '''Checks table is valid
-    '''
-    
-    if not isinstance(table, dict):
-        return False
-
-    if not 'title' in table:
-        return False
-
-    if not 'table' in table:
-        return False
-
-    if 'show' in table:
-        if not isinstance(table['show'], bool):
-            table['show'] = False
-    else:
-        table['show'] = True
-
-    if 'order' in table:
-        if not isinstance(table['order'], int):
-            table['order'] = 1
-    else:
-        table['order'] = 1
-
-    if 'newline' in table:
-        if not isinstance(table['newline'], bool):
-            table['newline'] = False
-    else:
-        table['newline'] = True
-
-    if 'heading' in table:
-        if isinstance(table['heading'], bool):
-            if table['heading']:
-                table['heading'] = table['title']
-            else:
-                table['heading'] = ''
-    else:
-        table['heading'] = ''         
-
-    if 'format' in table:
-        if isinstance(table['format'], str):
-            if '^' not in table['format']:
-                table['format'] += ' ^'
-        else:
-            table['format'] = '^'    
-    else:
-        table['format'] = '^'
-
-    if 'repeat' not in table:
-        table['repeat'] = 1
-
-    if 'variables' in table:
-        # evaluate dice roll in variables
-        dice_re = r'\$(\d+)[dD](\d+)([-+*]\d+)*\$'
-        table['variables'] = re.sub(dice_re, dice_roll, table['variables'])
-
-        # set variables        
-        vset_re = r'\$(\w+)=(\w+)\$'
-        re.sub(vset_re, set_variable, table['variables'])
-
-    return True
-
-
-def prepare_tables(tables):
-    '''convert list of tables from YAML file into TABLES dict
-    '''
-
-    global GAMETABLES
-    GAMETABLES = {}
-
-    for table in tables:
-        if not make_valid_table(table):
-            return False
-
-    for table in sorted(tables, key=lambda x: x['order']):
-
-        if table['title'] in GAMETABLES:
-            print(f'error duplicate title: {table["title"]}')
-            return False
-
-        GAMETABLES[table['title']] = table
-
-    return True
-
-
 def gametables(source, target):
 
-    # read table file
-    with open(source, 'r', encoding="utf8") as s:
-        tables = [t for t in yaml.safe_load_all(s)]
+    GameTable.database = {}
 
-    if not prepare_tables(tables):
-        print('Table format error')
-        exit()
+    with open(source, 'r', encoding="utf8") as s:
+        for t in yaml.safe_load_all(s):
+            GameTable(t.get('name'),
+                      t.get('table'),
+                      t.get('show', True),
+                      t.get('order', 1),
+                      t.get('newline', True),
+                      t.get('heading', False),
+                      t.get('format', '^'),
+                      t.get('repeat', 1),
+                      t.get('vars', '')
+                      )
+
+    GameTable.sort()
 
     t = open(target, 'w', encoding='utf8') if target else sys.stdout
 
-    # GAMETABLES is a dict but keeps insertion order
-    global GAMETABLES
-
-    for _, table in GAMETABLES.items():
-
-        global TABLE_RECURSION_COUNT
-        TABLE_RECURSION_COUNT = 0
-
-        if not table['show']:
+    # make list of GameTable keys because it might change during the loop
+    for table in list(GameTable.database):
+        if not GameTable.database[table].show:
             continue
 
-        result = all_results_from_table(table)
+        result = GameTable.database[table].result()
 
-        # write result
         t.write(result)
 
     if t is not sys.stdout:
