@@ -782,6 +782,32 @@ table:
     assert actual in expect
 
 
+def test_gamecards_dice_divide(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test
+newline: false
+table:
+-  $1d3/3$
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = '01'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
 def test_gamecards_dice_inline_list(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')

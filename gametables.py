@@ -37,7 +37,7 @@ class GameTable:
     database: ClassVar[Dict[str, Any]] = {}
     variable: ClassVar[Dict[str, str]] = {}
 
-    dice_re: ClassVar[str] = r'\$(\d+)[dD](\d+)([-+*]\d+)*\$'
+    dice_re: ClassVar[str] = r'\$(\d+)[dD](\d+)([-+*/]\d+)*\$'
     weight_re: ClassVar[str] = r'(\d+)\*\s(.+)'
     setvar_re: ClassVar[str] = r'\$(\w+)=(\w+)\$'
     getvar_re: ClassVar[str] = r'\$(\w+)\$'
@@ -211,8 +211,9 @@ def gametables(source, target):
 
     t = open(target, 'w', encoding='utf8') if target else sys.stdout
 
-    # make list of GameTable keys because it might change during the loop
+    # iterate list of GameTable keys because it might change during the loop
     for table in list(GameTable.database):
+
         if not GameTable.database[table].show:
             continue
 
