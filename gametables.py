@@ -15,11 +15,10 @@ import yaml
 __version__ = '0.0.1'
 
 
-TABLE_GROUP = {}
-TABLE_RECURSION_COUNT = 0
-
+GAMETABLES = {}
 VARIABLES = {}
 
+TABLE_RECURSION_COUNT = 0
 MAX_TABLE_RECURSION = 20
 
 
@@ -37,7 +36,7 @@ def get_table_weights(table):
 
     for s in select:
         if isinstance(s, str):
-            if (m := re.match(weight_re, s)):
+            if m := re.match(weight_re, s):
                 weights.append(int(m.group(1)))
             else:
                 weights.append(1)
@@ -48,13 +47,13 @@ def get_table_weights(table):
 
 
 def all_results_from_table(table):
-    
-    global TABLE_GROUP
+
+    global GAMETABLES
     result = ''
 
     if isinstance(table, re.Match):
-        if table.group(1) in TABLE_GROUP:
-            table = TABLE_GROUP[table.group(1)]
+        if table.group(1) in GAMETABLES:
+            table = GAMETABLES[table.group(1)]
         else:
             # unknown return empty string to stop
             return ''
@@ -103,9 +102,9 @@ def result_from_table(table):
         # list, or inline sequence
         select = table
     elif isinstance(table, re.Match):
-        # string, link to table in TABLE_GROUP
-        if table.group(1) in TABLE_GROUP:
-            select = TABLE_GROUP[table.group(1)]['table']
+        # string, link to table in GAMETABLES
+        if table.group(1) in GAMETABLES:
+            select = GAMETABLES[table.group(1)]['table']
     else:
         # unknown return empty string to stop
         return ''
@@ -254,8 +253,8 @@ def prepare_tables(tables):
     '''convert list of tables from YAML file into TABLES dict
     '''
 
-    global TABLE_GROUP
-    TABLE_GROUP = {}
+    global GAMETABLES
+    GAMETABLES = {}
 
     for table in tables:
         if not make_valid_table(table):
@@ -263,11 +262,11 @@ def prepare_tables(tables):
 
     for table in sorted(tables, key=lambda x: x['order']):
 
-        if table['title'] in TABLE_GROUP:
+        if table['title'] in GAMETABLES:
             print(f'error duplicate title: {table["title"]}')
             return False
 
-        TABLE_GROUP[table['title']] = table
+        GAMETABLES[table['title']] = table
 
     return True
 
@@ -284,18 +283,18 @@ def gametables(source, target):
 
     t = open(target, 'w', encoding='utf8') if target else sys.stdout
 
-    # TABLE_GROUP is a dict but keeps insertion order
-    global TABLE_GROUP
+    # GAMETABLES is a dict but keeps insertion order
+    global GAMETABLES
 
-    for _, table in enumerate(TABLE_GROUP):
+    for _, table in GAMETABLES.items():
 
         global TABLE_RECURSION_COUNT
         TABLE_RECURSION_COUNT = 0
 
-        if not TABLE_GROUP[table]['show']:
+        if not table['show']:
             continue
 
-        result = all_results_from_table(TABLE_GROUP[table])
+        result = all_results_from_table(table)
 
         # write result
         t.write(result)
