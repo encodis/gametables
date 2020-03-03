@@ -6,8 +6,6 @@ import pytest
 
 from gametables import gametables
 
-# TODO check for duplicate titles etc
-
 
 def test_gamecards(tmpdir):
 

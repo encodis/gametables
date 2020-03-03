@@ -17,7 +17,7 @@ from typing import ClassVar, Any, List, Dict, Union
 import yaml
 
 
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 
 @dataclass
@@ -50,12 +50,14 @@ class GameTable:
         if '^' not in self.format:
             self.format += ' ^'
 
+        #  get table weights, reformat table without them
         self._weights = [self.get_weight(entry) for entry in self.table]
         self.table = [self.del_weight(entry) for entry in self.table]
 
-        # set variables, if any, evaluating dice rolls first
+        # evaluate dice rolls in variables
         self.vars = re.sub(GameTable.dice_re, roll_dice, self.vars)
 
+        # set variables
         re.sub(GameTable.setvar_re, self.set_variable, self.vars)
 
         # add to database of all tables
@@ -66,7 +68,10 @@ class GameTable:
         '''
 
         if isinstance(self.repeat, str):
-            repeat = int(re.sub(GameTable.getvar_re, self.get_variable, self.repeat))
+            try:
+                repeat = int(re.sub(GameTable.getvar_re, self.get_variable, self.repeat))
+            except ValueError:
+                repeat = 1
         else:
             repeat = self.repeat
 
@@ -114,41 +119,46 @@ class GameTable:
             if link in GameTable.database:
                 choice = choice.replace('^' + link + '^', GameTable.database[link].result(), 1)
 
-        # returned cleaned up string
-        return choice.replace('_', '')
+        return choice
 
     @classmethod
     def sort(cls):
+        '''Sort the GameTable database by order
+        '''
+
         cls.database = {k: v for k, v in sorted(cls.database.items(), key=lambda item: item[1].order)}
 
     @classmethod
     def get_weight(cls, entry):
         '''extract weight from a table entry
         '''
+
         if isinstance(entry, str):
             if m := re.match(cls.weight_re, entry):
                 return int(m.group(1))
-            else:
-                return 1
-        else:
+
             return 1
 
+        return 1
+
     @classmethod
-    def del_weight(cls,  entry):
+    def del_weight(cls, entry):
         '''remove weight from a table entry
         '''
+
         if isinstance(entry, str):
             if m := re.match(cls.weight_re, entry):
                 return m.group(2)
-            else:
-                return entry
-        else:
+
             return entry
+
+        return entry
 
     @classmethod
     def set_variable(cls, var):
         '''set a variable
         '''
+
         # var is match object
         cls.variable[var.group(1)] = var.group(2)
 
@@ -159,8 +169,8 @@ class GameTable:
     def get_variable(cls, var):
         '''get a variable, return empty string if not found
         '''
-        # var is match object
 
+        # var is match object
         return cls.variable.get(var.group(1), '')
 
 
@@ -191,6 +201,8 @@ def roll_dice(dice):
 
 
 def gametables(source, target):
+    '''Output tables from source file
+    '''
 
     GameTable.database = {}
 
