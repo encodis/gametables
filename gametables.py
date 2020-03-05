@@ -41,7 +41,7 @@ class GameTable:
     weight_re: ClassVar[str] = r'(\d+)\*\s(.+)'
     setvar_re: ClassVar[str] = r'\$(\w+)=(\w+)\$'
     getvar_re: ClassVar[str] = r'\$(\w+)\$'
-    links_re: ClassVar[str] = r'\^([\w\s]+)\^'
+    links_re: ClassVar[str] = r'\^([\w\s-]+)\^'
 
     def __post_init__(self):
         if isinstance(self.heading, bool) and self.heading:
@@ -50,7 +50,7 @@ class GameTable:
         if '^' not in self.format:
             self.format += ' ^'
 
-        #  get table weights, reformat table without them
+        #  get table weights, reformat table entries without them
         self._weights = [self.get_weight(entry) for entry in self.table]
         self.table = [self.del_weight(entry) for entry in self.table]
 
@@ -84,7 +84,8 @@ class GameTable:
         if self.heading:
             result = self.heading + '\n' + result
 
-        return result.strip(' ')
+        # replace 'empty string' marker
+        return result.replace('__', '').lstrip(' ')
 
     def choose(self):
         '''Choose an item from the table, using weights, follow links, resolve vars/dice etc
@@ -106,7 +107,7 @@ class GameTable:
             return table.choose()
 
         # replace die rolls
-        choice = re.sub(GameTable.dice_re, roll_dice, choice)
+        choice = re.sub(GameTable.dice_re, roll_dice, str(choice))
 
         # set vars, remove expression
         choice = re.sub(GameTable.setvar_re, self.set_variable, choice)
@@ -134,7 +135,7 @@ class GameTable:
         '''
 
         if isinstance(entry, str):
-            if m := re.match(cls.weight_re, entry):
+            if m := re.match(cls.weight_re, entry, re.DOTALL):
                 return int(m.group(1))
 
             return 1
@@ -147,7 +148,7 @@ class GameTable:
         '''
 
         if isinstance(entry, str):
-            if m := re.match(cls.weight_re, entry):
+            if m := re.match(cls.weight_re, entry, re.DOTALL):
                 return m.group(2)
 
             return entry
@@ -197,6 +198,8 @@ def roll_dice(dice):
         elif modifier.startswith('/'):
             total = math.trunc(total/value)
 
+    total = 0 if total < 0 else total
+
     return str(total)
 
 
@@ -207,17 +210,21 @@ def gametables(source, target):
     GameTable.database = {}
 
     with open(source, 'r', encoding="utf8") as s:
-        for t in yaml.safe_load_all(s):
-            GameTable(t.get('name'),
-                      t.get('table'),
-                      t.get('show', True),
-                      t.get('order', 1),
-                      t.get('newline', True),
-                      t.get('heading', False),
-                      t.get('format', '^'),
-                      t.get('repeat', 1),
-                      t.get('vars', '')
-                      )
+        try:
+            for t in yaml.safe_load_all(s):
+                GameTable(t.get('name'),
+                          t.get('table'),
+                          t.get('show', True),
+                          t.get('order', 1),
+                          t.get('newline', True),
+                          t.get('heading', False),
+                          t.get('format', '^'),
+                          t.get('repeat', 1),
+                          t.get('vars', '')
+                          )
+        except yaml.scanner.ScannerError:
+            print(f'YAML format error in {source}')
+            sys.exit()
 
     GameTable.sort()
 
@@ -244,6 +251,8 @@ def main(args=None):
     parser = argparse.ArgumentParser(description="Randomly choose an entry from a sequence in a YAML file")
     parser.add_argument("source", help="Source file (YAML)")
     args = parser.parse_args(args)
+
+    # options to change defaults for order, repeat, newline etc. also suppress
 
     gametables(args.source, '')
 
