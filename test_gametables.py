@@ -300,6 +300,88 @@ table:
     assert actual == expect
 
 
+def test_gamecards_lookup(tmpdir):
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test
+lookup: $1d6$
+table:
+-  1 first
+-  2-4 second
+-  5-6 third
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has specified format
+    expect = ['first\n', 'second\n', 'third\n']
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
+def test_gamecards_lookup_auto(tmpdir):
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test
+lookup: true
+table:
+-  1 first
+-  2-4 second
+-  5-6 third
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has specified format
+    expect = ['first\n', 'second\n', 'third\n']
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
+def test_gamecards_lookup_2d6(tmpdir):
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test
+lookup: $2d6$
+table:
+-  1 __
+-  2-7 first
+-  8-11 second
+-  12 third
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has specified format
+    expect = ['first\n', 'second\n', 'third\n']
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
 def test_gamecards_format(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')

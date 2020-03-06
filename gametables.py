@@ -24,6 +24,7 @@ __version__ = '0.1.0'
 class GameTable:
     name: str
     table: List[Union[str, list]]
+    lookup: Union[bool, str] = False
     show: bool = True
     order: int = 1
     newline: bool = True
@@ -36,9 +37,11 @@ class GameTable:
 
     database: ClassVar[Dict[str, Any]] = {}
     variable: ClassVar[Dict[str, str]] = {}
+    maxlimit: ClassVar[int] = 20
 
     dice_re: ClassVar[str] = r'\$(\d+)[dD](\d+)([-+*/]\d+)*\$'
     weight_re: ClassVar[str] = r'(\d+)\*\s(.+)'
+    lookup_re: ClassVar[str] = r'(\d+)-?(\d+)?\s(.+)'
     setvar_re: ClassVar[str] = r'\$(\w+)=(\w+)\$'
     getvar_re: ClassVar[str] = r'\$(\w+)\$'
     links_re: ClassVar[str] = r'\^([\w\s-]+)\^'
@@ -50,9 +53,35 @@ class GameTable:
         if '^' not in self.format:
             self.format += ' ^'
 
-        #  get table weights, reformat table entries without them
-        self._weights = [self.get_weight(entry) for entry in self.table]
-        self.table = [self.del_weight(entry) for entry in self.table]
+        if self.lookup:
+            table = []
+
+            for t in self.table:
+                if m := re.match(GameTable.lookup_re, t):
+                    line = m.groups(m.group(1))
+                else:
+                    print(f'Bad lookup table for {self.name}')
+                    sys.exit()
+
+                for _ in range(int(line[0]), int(line[1])+1):
+                    table.append(line[2])
+
+            self.table = table
+
+            # if lookup was True, replace with expression based on size of table
+            if isinstance(self.lookup, bool):
+                self.lookup = f'$1d{len(table)}$'
+            else:
+                # check its a valid expression using dice_re
+                pass
+
+            # TODO if the expression is xDy where x >= 2, auto prepend x-1 blanks
+            # but this will not work if there is something else like +mod etc
+
+        else:
+            #  get table weights, reformat table entries without them
+            self._weights = [self.get_weight(entry) for entry in self.table]
+            self.table = [self.del_weight(entry) for entry in self.table]
 
         # evaluate dice rolls in variables
         self.vars = re.sub(GameTable.dice_re, roll_dice, self.vars)
@@ -94,11 +123,16 @@ class GameTable:
         # check for too deep recursion
         self._visits += 1
 
-        if self._visits > 20:
+        if self._visits > GameTable.maxlimit:
             return ''
 
         # select random entry from table
-        choice = random.choices(self.table, weights=self._weights)[0]
+        if self.lookup:
+            # TODO should be full expression, and check index
+            lookup = int(re.sub(GameTable.dice_re, roll_dice, self.lookup)) - 1
+            choice = self.table[lookup]
+        else:
+            choice = random.choices(self.table, weights=self._weights)[0]
 
         # if a list has been picked, re-choose from that list
         if isinstance(choice, list):
@@ -107,6 +141,7 @@ class GameTable:
             return table.choose()
 
         # replace die rolls
+        # NOTE currently do this BEFORE setting variables in case they have a dice roll because we use $$ for both
         choice = re.sub(GameTable.dice_re, roll_dice, str(choice))
 
         # set vars, remove expression
@@ -175,16 +210,22 @@ class GameTable:
         return cls.variable.get(var.group(1), '')
 
 
-def roll_dice(dice):
+def roll_dice(dice, max=False, min=False):
     '''roll a dice expression
+       dice is a match object
     '''
 
     number, sides, modifier = dice.groups('')
 
     total = 0
 
-    for _ in range(int(number)):
-        total += random.randint(1, int(sides))
+    if max:
+        total = number * sides
+    elif min:
+        total = number
+    else:
+        for _ in range(int(number)):
+            total += random.randint(1, int(sides))
 
     if modifier:
         value = int(modifier[1:])
@@ -214,6 +255,7 @@ def gametables(source, target):
             for t in yaml.safe_load_all(s):
                 GameTable(t.get('name'),
                           t.get('table'),
+                          t.get('lookup', False),
                           t.get('show', True),
                           t.get('order', 1),
                           t.get('newline', True),
