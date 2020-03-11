@@ -1,0 +1,120 @@
+# from Conan - Gamemasters's Toolkit by Modiphious
+---
+name: structure
+table:
+- ^the^ ^possible descriptor^ ^object^ on the ^object^
+- ^the^ ^possible descriptor^ ^object^ of the ^object^
+- ^the^ ^possible descriptor^ ^entity^ in the ^location^
+- ^the^ ^object^ of ^object^
+- A/an ^entity^ Is/Will Be/Shall Be ^disposition^
+- ^the^ ^disposition^ of ^entity^
+- ^entity^ ^location^
+- ^the^ ^possible descriptor^ ^object^
+- ^possible descriptor^ ^object^ in the ^location^
+- ^possible descriptor^ ^entity^ of the ^location^
+...
+---
+name: the
+show: false
+format: '^'
+table:
+- The
+- A/An
+- ''
+...
+---
+name: object
+show: false
+format: '^'
+table:
+- [Jewel, Gem, Amulet] 
+- [Crown, Scepter, Throne]
+- [Skull, Bone]
+- [Thunder, Rain, Wind, Storm]
+- [Knife, Sword, Axe, Spear, Blade]
+- [Night, Midnight, Shadow, Darkness]
+- [Kingdom, Empire, Land, Realm] 
+- [Tribe, People, Folk]
+- [Flame, Fire, Pyre, Brand]
+- [Circle, Ring, Obelisk, Column]
+...
+---
+name: entity
+show: false
+format: '^'
+table:
+- [Demon, Devil, Fiend, Horror]
+- [Ghost, Spirit, Specter]
+- [Ghoul, Dweller, Serpent Folk, Abomination]
+- [Vulture, Serpent, Eagle, Wolf, Raven, Lion, Tiger, Owl, Ape, Rat, Eagle, Hound, Hawk]
+- [King, Queen, Lord, Lady, Emperor, Empress, Warlord, Prince, Princess]
+- [Sorcerer, Witch]
+- [Priest, Priestess]
+- ^god^
+- [Phoenix, Dragon, Hydra, Mummy]
+- [Stranger, The One, Dweller, Lurker, Holder, Keeper]
+...
+---
+name: god
+show: false
+format: '^'
+table:
+- Set
+- Jhebbal Sag
+- Asura
+- Ishtar
+- Mitra
+- Bel
+- The Spider-God
+...
+---
+name: location
+show: false
+format: '^'
+table:
+- Tower
+- [Citadel, Castle, Fortress]
+- [Cave, Cavern]
+- City
+- River
+- Pool
+- Forest
+- Temple
+- Pit
+- [Tomb, Crypt]
+...
+---
+name: disposition
+show: false
+format: '^'
+table:
+- Born
+- Cursed
+- Haunted
+- Doomed
+- Lost
+- Damned
+- Spawned
+- Fallen
+- Broken
+- Forgotten
+...
+---
+name: possible descriptor
+show: false
+format: '^'
+table:
+- 2* __
+- ^descriptor^
+...
+---
+name: descriptor
+show: false
+format: '^'
+table:
+- [Black, Ebon, Crimson, Red, Scarlet]
+- [Ancient, Elder, Old]
+- [Iron, Steel, Silver, Gold, Golden, Stone, Bronze]
+- [Cold, Fire, Fiery]
+- [Shining, Gleaming, Jewelled, Shadowed]
+...
