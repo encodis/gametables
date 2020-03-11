@@ -1,4 +1,4 @@
-"""Randomly choose an entry from a sequence in a YAML file
+"""Choose random entries from sequences in a YAML file
 
 """
 
@@ -11,7 +11,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(name='gametables',
       version='0.1.0',
-      description='Randomly choose an entry from a sequence in a YAML file',
+      description='Choose random entries from sequences in a YAML file',
       long_description=long_description,
       long_description_content_type='text/markdown',
       url='https://github.com/encodis/gametables',
@@ -27,6 +27,10 @@ setup(name='gametables',
       ],
       keywords='gametables tables games playing',
       py_modules=['gametables'],
+      install_requires=[
+        'pyyaml>=5.1',
+        'py_expression_eval'
+      ],
       entry_points={
         'console_scripts': [
             'gametables = gametables:main',

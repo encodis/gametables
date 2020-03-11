@@ -1,0 +1,224 @@
+# from Conan - Ancient Ruins & Cursed Cities by Modiphious
+---
+name:  era
+format: "Ruin Era: ^\n"
+table:
+- Time of the Great Old Ones $purpose=2$
+- 2* The Age of the Serpent Men $purpose=3$
+- 2* The Great Ice Age $purpose=4$
+- 2* The First Age of Humanity $purpose=5$
+- 4* The Thurian Age $purpose=6$
+- 3* The Cataclysm $purpose=1$
+- 6* The Hyborian Age $purpose=6$
+...
+---
+name:  purpose
+header: "Purpose:\n"
+format: "  ^\n"
+repeat: $purpose$
+table:
+- A home to the aristocracy
+- A port for ships
+- An outpost
+- A center for scholarship and learning
+- A haven for criminals
+- A wondrous monument
+- Cultivated land, with long-disused irrigation and farms
+- The capital of a forgotten nation
+- One or more temples to the gods of the era
+- A military base of operations
+- A place where goods were crafted or manufactured
+- A crossroads for travel
+- A marketplace and center of trade
+- A vault where valuables or relics were stored
+- A necropolis where the culture placed their dead
+- A vast mine, extracting mineral wealth from the depths
+- A fell site of occult power
+- A frontier settlement at the edges of a lost nation
+- An enormous vessel (but not necessarily seagoing)
+- A hidden camp or stronghold for spies or a forgotten rebellion
+...
+---
+name: remains
+format: "Remains:  ^\n"
+table:
+- 2* Founding
+- 2* Classical Antiquity
+- [Great Man, Great Woman] 
+- 4* Decadent Nobility
+- 3* Disaster!
+- Great Leap Forward
+- 3* Conquered or Enslaved
+- 2* Religion
+- War!
+- Revival
+...
+---
+name: downfall
+format: "Downfall: ^\n"
+table:
+- Authority’s Greed
+- Barbaric Banditry
+- Climatic Shift
+- Conspiracy of Shadows
+- Consuming Horde
+- Decadent Decline
+- Eldritch Event
+- Falling Star
+- Final War
+- Forbidden Knowledge
+- Ghosts of the Past
+- Infertility
+- Madness
+- Mass Suicide
+- Natural Disaster
+- Plague
+- Religious Mania
+- Signs and Portents
+- Torments of the Damned
+- Unknown
+...
+---
+name:  size
+format: '^'
+show: true
+newline: false
+table:
+- 4* ^village^
+- 5* ^town^
+- 6* ^average city^
+- 2* ^regional city^
+- 2* ^capital city^
+- ^metropolis^
+...
+---
+name: cliffhanger
+format: "Cliffhanger: ^\n"
+table:
+- Foes
+- The Unnatural Thing
+- Go the Other Way!
+- Outrageous Fortune
+- It’s Personal
+- Foulness in the Air
+- Ancient and Deadly Mechanism
+- Precarious Locale
+- Feral Fiends
+- No Escape!
+- Natural Disaster
+- Betrayal
+- Time to Run
+- Bad Information
+- Foul Sorcery
+- Deadly Dog-Brothers
+- Didn’t We Come This Way Already?
+- Pandora’s Box
+- The Sands of Time Run Short
+- The Weight of Ages
+...
+---
+name: village
+header: "Village:\n"
+format: "  ^\n"
+show: false
+repeat: 1
+table:
+- ^area descriptor^ ^area type^
+...
+---
+name:  town
+header: "Town:\n"
+format: "  ^\n"
+show: false
+repeat: 2
+table:
+- ^area descriptor^ ^area type^
+...
+---
+name: average city
+header: "City:\n"
+format: "  ^\n"
+show: false
+repeat: 3
+table:
+- ^area descriptor^ ^area type^
+...
+---
+name: regional city
+header: "Regional City:\n"
+format: "  ^\n"
+show: false
+repeat: 4
+table:
+- ^area descriptor^ ^area type^
+...
+---
+name: capital city
+header: "Capital City:\n"
+format: "  ^\n"
+show: false
+repeat: 5
+table:
+- ^area descriptor^ ^area type^
+...
+---
+name: metropolis
+header: "Metropolis:\n"
+format: "  ^\n"
+show: false
+repeat: 6
+table:
+- ^area descriptor^ ^area type^
+...
+---
+name: area descriptor
+show: false
+format: '^'
+table:
+- Peaceful
+- [Abandoned, Derelict]
+- Windswept
+- Dreadful
+- Overgrown
+- Submerged
+- Ancient
+- Impossible
+- Perched
+- Elevated
+- Near-Collapse
+- Subterranean
+- Silent
+- Dripping
+- [Chilly, Cold]
+- Infested
+- Filthy
+- Cramped
+- [Vandalized, Destroyed]
+- Choking Odor
+...
+---
+name: area type
+show: false
+format: '^'
+table:
+- Temple
+- Militia Compound
+- Courtyard
+- Hovel
+- Merchant’s Villa
+- Noble’s Mansion
+- Civil Structure
+- Marketplace
+- Storehouse
+- Aqueduct
+- Prison
+- Palace
+- [Graveyard, Tombs] 
+- Brothel
+- Sewer
+- [Animal Pens, Stables]
+- Thieves’ Den
+- [Tavern, Inn]
+- Hostel
+- [Forum, Arena]
+...

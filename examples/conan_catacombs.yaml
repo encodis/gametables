@@ -1,0 +1,1306 @@
+# From "Catacombs of Hyboria", Second Edition by Mongoose Publishing
+# This file is provided as an example of how to generate more complex 
+# results. A convention followed here is to use snake case for the
+# table names because there are so many of them, and they are quite
+# heavily inter-related, but that's not mandatory.
+---
+name: site_type
+format: "Type:   ^\n"
+table:
+- 5* Hollow $type=hollow$ $num_plots=1d4-3$
+- 5* Cave $type=cave$ $num_plots=1d4-3$
+- 3* Tube $type=tube$ $num_plots=1d4-2$
+- Flow $type=tube$ $num_plots=1d4-2$
+- 3* Cavern $type=cavern$ $num_plots=1d4-2$
+- Catacomb $type=catacomb$ $num_plots=1d4-1$
+- Mine $type=catacomb$ $num_plots=1d4-1$
+- Tunnel $type=catacomb$ $num_plots=1d4-1$
+- Cavern System $type=system$ $num_plots=1d4-1$
+...
+---
+name: size
+format: "Size:   ^\n"
+table:
+- 3* Very Small $size=very_small$
+- 3* Small $size=small$
+- 4* Below Average $size=below_average$
+- 7* Average $size=average$
+- 2* Large $size=large$
+- Very Large $size=very_large$
+...
+---
+name: square_feet
+format: "Area:   ^ sq. ft.\n"
+table:
+- ^$size$_$type$_area^
+...
+---
+name: depth
+format: "Depth:  ^ ft.\n"
+table:
+- ^$type$_depth^^terrain_depth_modifier^
+...
+---
+name: terrain_depth_modifier
+show: false
+format: '^'
+lookup: $depth$
+table:
+- 0-50 $terrain_depth_modifier=-2$
+- 51-100 $terrain_depth_modifier=-1$
+- 101-500 $terrain_depth_modifier=0$
+- 501-1000 $terrain_depth_modifier=+1$
+- 1001-5000 $terrain_depth_modifier=+2$
+- 5001 $terrain_depth_modifier=+3$
+...
+---
+name: terrain_elements
+header: "Terrain:\n"
+repeat: $terrain_elements$
+table:
+- ^$type$_terrain^
+...
+# Unique terrain elements have a % chance of occurring for each type. This is
+# tricky to do, so is broken down into ^type_unique^ tables. Note that newline
+# is false so that there is no newline if there is no unique element
+---
+name: unique
+format: '^'
+table:
+- ^$type$_unique^
+...
+---
+name: plots
+header: "Plots:\n"
+repeat: $num_plots$
+table:
+- ^$type$_plots^
+#
+# Library tables - nothing below here is output directly
+#
+# Determine area in square feet according to type and size. These also
+# set the terrain_elements variable. In the original this is a 2D table
+# so we have to split the rolls out into multiple sub-tables. A bit
+# long winded but it works! Also note the original contains rolls of, e.g.
+# "(1d8+2)/2" but the basic nature of the "dice" regular expression means
+# that these are not supported. So this has been changed to "1d10/2" and so on
+---
+name: very_small_hollow_area
+show: false
+format: '^'
+table:
+- $1d4*100$ $terrain_elements=1d3/3$
+...
+---
+name: very_small_cave_area
+show: false
+format: '^'
+table:
+- $1d6*200$ $terrain_elements=(1d4+1)/3$
+...
+---
+name: very_small_tube_area
+show: false
+format: '^'
+table:
+- $2d6*300$ $terrain_elements=(1d6+1)/3$
+...
+---
+name: very_small_cavern_area
+show: false
+format: '^'
+table:
+- $2d6*2000$ $terrain_elements=(1d8+1)/3$
+...
+---
+name: very_small_catacomb_area
+show: false
+format: '^'
+table:
+- $3d6*1000$ $terrain_elements=(1d6+2)/3$
+...
+---
+name: very_small_system_area
+show: false
+format: '^'
+table:
+- $2d6*50000$ $terrain_elements=3d10/3$
+...
+---
+name: small_hollow_area
+show: false
+format: '^'
+table:
+- $1d6*100$ $terrain_elements=1d3/2$
+...
+---
+name: small_cave_area
+show: false
+format: '^'
+table:
+- $2d4*200$ $terrain_elements=(1d4+1)/2$
+...
+---
+name: small_tube_area
+show: false
+format: '^'
+table:
+- $3d6*300$ $terrain_elements=(1d6+1)/2$
+...
+---
+name: small_cavern_area
+show: false
+format: '^'
+table:
+- $3d6*2000$ $terrain_elements=(1d8+2)/2$
+...
+---
+name: small_catacomb_area
+show: false
+format: '^'
+table:
+- $4d6*2000$ $terrain_elements=(1d6+2)/2$
+...
+---
+name: small_system_area
+show: false
+format: '^'
+table:
+- $5d6*50000$ $terrain_elements=3d10/2$
+...
+---
+name: below_average_hollow_area
+show: false
+format: '^'
+table:
+- $2d3*100$ $terrain_elements=1d3$
+...
+---
+name: below_average_cave_area
+show: false
+format: '^'
+table:
+- $2d6*200$ $terrain_elements=1d4+1$
+...
+---
+name: below_average_tube_area
+show: false
+format: '^'
+table:
+- $3d6*400$ $terrain_elements=1d6+1$
+...
+---
+name: below_average_cavern_area
+show: false
+format: '^'
+table:
+- $3d6*3000$ $terrain_elements=1d8+2$
+...
+---
+name: below_average_catacomb_area
+show: false
+format: '^'
+table:
+- $5d6*3000$ $terrain_elements=1d6+2$
+...
+---
+name: below_average_system_area
+show: false
+format: '^'
+table:
+- $2d6*100000$ $terrain_elements=3d10$
+...
+---
+name: average_hollow_area
+show: false
+format: '^'
+table:
+- $2d4*100$ $terrain_elements=1d3$
+...
+---
+name: average_cave_area
+show: false
+format: '^'
+table:
+- $3d6*200$ $terrain_elements=1d4+1$
+...
+---
+name: average_tube_area
+show: false
+format: '^'
+table:
+- $4d6*400$ $terrain_elements=1d6+1$
+...
+---
+name: average_cavern_area
+show: false
+format: '^'
+table:
+- $3d6*5000$ $terrain_elements=1d8+2$
+...
+---
+name: average_catacomb_area
+show: false
+format: '^'
+table:
+- $6d6*4000$ $terrain_elements=1d6+2$
+...
+---
+name: average_system_area
+show: false
+format: '^'
+table:
+- $5d6*100000$ $terrain_elements=3d10$
+...
+---
+name: large_hollow_area
+show: false
+format: '^'
+table:
+- $2d4*125$ $terrain_elements=1d3*2$
+...
+---
+name: large_cave_area
+show: false
+format: '^'
+table:
+- $5d6*200$ $terrain_elements=(1d4+1)*2$
+...
+---
+name: large_tube_area
+show: false
+format: '^'
+table:
+- $5d6*400$ $terrain_elements=(1d6+1)*2$
+...
+---
+name: large_cavern_area
+show: false
+format: '^'
+table:
+- $3d6*7500$ $terrain_elements=(1d8+2)*2$
+...
+---
+name: large_catacomb_area
+show: false
+format: '^'
+table:
+- $7d6*5000$ $terrain_elements=(1d6+2)*2$
+...
+---
+name: large_system_area
+show: false
+format: '^'
+table:
+- $2d6*200000$ $terrain_elements=3d10*2$
+...
+---
+name: very_large_hollow_area
+show: false
+format: '^'
+table:
+- $2d6*100$ $terrain_elements=1d3*3$
+...
+---
+name: very_large_cave_area
+show: false
+format: '^'
+table:
+- $5d6*300$ $terrain_elements=(1d4+1)*3$
+...
+---
+name: very_large_tube_area
+show: false
+format: '^'
+table:
+- $5d6*500$ $terrain_elements=(1d6+1)*3$
+...
+---
+name: very_large_cavern_area
+show: false
+format: '^'
+table:
+- $3d6*10000$ $terrain_elements=(1d8+2)*3$
+...
+---
+name: very_large_catacomb_area
+show: false
+format: '^'
+table:
+- $8d6*6000$ $terrain_elements=(1d6+2)*3$
+...
+---
+name: very_large_system_area
+show: false
+format: '^'
+table:
+- $5d6*200000$ $terrain_elements=3d10*3$
+...
+# Site depth, in feet, as a function of type
+---
+name: hollow_depth
+show: false
+format: '^'
+table:
+- 3* $depth=2d4*5$ $depth$
+- 3* $depth=4d4*5$ $depth$
+- 9* $depth=5d6*5$ $depth$
+- 5* $depth=0$ $depth$
+...
+---
+name: cave_depth
+show: false
+format: '^'
+table:
+- 3* $depth=1d6*5$ $depth$
+- 3* $depth=3d6*5$ $depth$
+- 9* $depth=2d6*10$ $depth$
+- 3* $depth=3d6*50$ $depth$
+- 2* $depth=3d6*100$ $depth$
+...
+---
+name: tube_depth
+show: false
+format: '^'
+table:
+- 3* $depth=2d6*100$ $depth$
+- 3* $depth=3d6*100$ $depth$
+- 9* $depth=3d6*200$ $depth$
+- 3* $depth=4d6*200$ $depth$
+- 2* $depth=5d6*250$ $depth$
+...
+---
+name: cavern_depth
+show: false
+format: '^'
+table:
+- 3* $depth=1d6*50$ $depth$
+- 3* $depth=2d6*50$ $depth$
+- 9* $depth=2d6*100$ $depth$
+- 3* $depth=5d6*100$ $depth$
+- 2* $depth=5d6*200$ $depth$
+...
+---
+name: catacomb_depth
+show: false
+format: '^'
+table:
+- 3* $depth=1d4*50$ $depth$
+- 3* $depth=1d6*50$ $depth$
+- 9* $depth=2d6*50$ $depth$
+- 3* $depth=3d6*50$ $depth$
+- 2* $depth=4d6*100$ $depth$
+...
+---
+name: system_depth
+show: false
+format: '^'
+table:
+- 3* $depth=2d6*50$ $depth$
+- 3* $depth=3d6*50$ $depth$
+- 9* $depth=2d6*150$ $depth$
+- 3* $depth=5d6*150$ $depth$
+- 2* $depth=4d6*300$ $depth$
+...
+# Terrain elements, as a function of site type. Note that in the original "hand rolled"
+# system there is a modifier applied to the d20 roll based on the depth of the caverns,
+# but the program can't handle this yet. So 'structural' elements will be over represented
+# and 'vast_depth' elements will be under represented. 
+---
+name: hollow_terrain
+show: false
+format: '^'
+lookup: $1d20+terrain_depth_modifier$
+table:
+- 1 ^structural^
+- 2-9 ^surfacing^
+- 10-17 ^ceiling^
+- 18 ^man-made^
+- 19 ^flora^
+- 20 ^fauna^
+...
+---
+name: cave_terrain
+show: false
+format: '^'
+lookup: $1d20+terrain_depth_modifier$
+table:
+- 1-3 ^structural^
+- 4-9 ^surfacing^
+- 10-14 ^ceiling^
+- 15 ^man-made^
+- 16-18 ^flora^
+- 19-20 ^fauna^
+- 21 ^vast_depth^
+...
+---
+name: tube_terrain
+show: false
+format: '^'
+lookup: $1d20+terrain_depth_modifier$
+table:
+- 0 ^structural^
+- 1-9 ^surfacing^
+- 10-16 ^ceiling^
+- 17 ^flora^
+- 18 ^fauna^
+- 19 ^vast_depth^
+...
+---
+name: cavern_terrain
+show: false
+format: '^'
+lookup: $1d20+terrain_depth_modifier$
+table:
+- 1-2 ^structural^
+- 3-8 ^surfacing^
+- 9-13 ^ceiling^
+- 14-15 ^man-made^
+- 16-18 ^flora^
+- 19-20 ^fauna^
+- 21 ^vast_depth^
+...
+---
+name: catacomb_terrain
+show: false
+format: '^'
+lookup: $1d20+terrain_depth_modifier$
+table:
+- 1 ^structural^
+- 2-3 ^surfacing^
+- 4-6 ^ceiling^
+- 7-15 ^man-made^
+- 16-17 ^flora^
+- 18-20 ^fauna^
+- 21 ^vast_depth^
+...
+---
+name: system_terrain
+show: false
+format: '^'
+lookup: $1d20+terrain_depth_modifier$
+table:
+- 1-2 ^structural^
+- 3-7 ^surfacing^
+- 8-12 ^ceiling^
+- 13-14 ^man-made^
+- 15-17 ^flora^
+- 18-20 ^fauna^
+- 21 ^vast_depth^
+...
+# Terrain element types. Some of these (like "mineral_deposits") are links to 
+# tables with further information. These tables will supply the full output,
+# but it would be possible to have an entry like "3* Mineral Deposits ^mineral_deposits^"
+# with the linked table providing only the additional info. In other cases (e.g. "Thick Pillars")
+# simple supplementary info is supplied inline.
+---
+name: structural
+show: false
+format: "\tStructure:   ^"
+table:
+- 8* Unstable
+- 19* Air Pockets
+- 45* Thick Pillars ($1d6$ per 250 sq. ft.)
+- 19* Cut/Set Stone
+- 6* Softer Stone
+- 3* ^mineral_deposits^
+...
+---
+name: surfacing
+show: false
+format: "\tSurface:     ^"
+table:
+- Jagged Rock Face (area $1d10*10$%)
+- 4* Gorge/Cliff (span $3d6*5$ ft., depth $2d6*10$ ft.)
+- 12* ^waterway_access^
+- 36* ^stalagmite_field^
+- 5* Loose Gravel (area $1d10*10$%)
+- 7* Pitted Stone (area $1d10*5$%)
+- 2* Smooth/Slick (area $1d10*10$%)
+- Tombscape (length $2d4*5$ ft.)
+...
+---
+name: ceiling
+show: false
+format: "\tCeiling:     ^"
+table:
+- 8* Falling Stones (dangerous area $3d6*5$ ft.)
+- 19* Low Ceiling (actual height $2d4$ ft.)
+- 44* ^stalactite_overhang^
+- 19* Optical Illusion of Height
+- 6* Sunshafts
+- 3* Natural Reinforcement
+...
+---
+name: man-made
+show: false
+format: "\tMan-Made:    ^"
+table:
+- $num_traps=1d3$$num_traps$ ^traps^
+- 4* Portcullis/Grate
+- 12* Doors/Gates
+- 34* $2d6$ Light Sources
+- 41* ^previous_exploration_materials^
+- 7* ^burial_chamber^
+- 2* Living Space (area $2d6*20$ sq. ft.)
+- ^reliquary^
+...
+---
+name: flora
+show: false
+format: "\tFlora:       ^"
+table:
+- 3* ^dangerous_growth^
+- 25* ^poisonous_growth^
+- 56* Common Growth (area $1d10*10$%)
+- 14* Flowering Growth (area $2d6*10$ sq. ft.)
+- 3* ^useful_growth^
+...
+---
+name: fauna
+show: false
+format: "\tFauna:       ^"
+table:
+- 3* ^parasitical^
+- 14* ^burrowing^
+- 25* ^aerial^
+- 42* ^crawling^
+- 14* ^large_creature^
+- 3* ^subterranean^
+...
+---
+name: vast_depth
+show: false
+format: "\tVast Depth:  ^"
+table:
+- Volcanic Pool (area $5d6*50$ sq. ft.)
+- Abyssal Crevasse (width $5d6*10$ ft.)
+- $2d6$ Steam Vents
+- ^underground_river^
+- ^underground_lake^
+- Phosphorescent Growths (area $1d10*10$%)
+- ^gemstone_field^
+- Ancient Art/Symbols (area $2d6*10$ sq. ft.)
+...
+# Tables for unique terrain. Note that there are no headings or formatting.
+# The formatting is "faked" by the entry itself so that if there is no unique
+# terrain element (the "__" entry) then there is no output at all.
+---
+name: hollow_unique
+show: false
+format: '^'
+table:
+- 98* __
+- "2* \tUnique:      ^unique_terrain^\n"
+...
+---
+name: cave_unique
+show: false
+format: '^'
+table:
+- 98* __
+- "2* \tUnique:      ^unique_terrain^\n"
+...
+---
+name: tube_unique
+show: false
+format: '^'
+table:
+- 99* __
+- "\tUnique:      ^unique_terrain^\n"
+...
+---
+name: cavern_unique
+show: false
+format: '^'
+table:
+- 98* __
+- "2* '\tUnique:      ^unique_terrain^\n"
+...
+---
+name: catacomb_unique
+show: false
+format: '^'
+table:
+- 97* __
+- "3* \tUnique:      ^unique_terrain^\n"
+...
+---
+name: system_unique
+show: false
+format: '^'
+table:
+- 96* __
+- "4* \tUnique:      ^unique_terrain^\n"
+...
+---
+name: unique_terrain
+show: false
+format: '^'
+table:
+- Lair of the Dead
+- Ancient Tomb
+- Lost Land
+- Home to a Beast
+- Portal to Darkness
+- Sign of the Gods
+...
+# Plots for each site type. Note that in the original this was a single table
+# with 12 entries, but "hollows" rolled 1d4, "caves" rolled 1d6 and so on. 
+# The repetition of entries serves the same purpose.
+---
+name: hollow_plots
+show: false
+format: "\t^"
+table:
+- Predatory Squatter
+- Den of Thieves
+- Buried Treasure
+- Unseasonal Growth
+...
+---
+name: cave_plots
+show: false
+format: "\t^"
+table:
+- Predatory Squatter
+- Den of Thieves
+- Buried Treasure
+- Unseasonal Growth
+- Bat Migration
+- Unearthed Graves
+...
+---
+name: tube_plots
+show: false
+format: "\t^"
+table:
+- Predatory Squatter
+- Den of Thieves
+- Buried Treasure
+- Unseasonal Growth
+- Bat Migration
+- Unearthed Graves
+- Bandit Hideout
+- Flooding
+...
+---
+name: cavern_plots
+show: false
+format: "\t^"
+table:
+- Predatory Squatter
+- Den of Thieves
+- Buried Treasure
+- Unseasonal Growth
+- Bat Migration
+- Unearthed Graves
+- Bandit Hideout
+- Flooding
+- Weapon Cache
+- Local Celebration
+...
+---
+name: catacomb_plots
+show: false
+format: "\t^"
+table:
+- Predatory Squatter
+- Den of Thieves
+- Buried Treasure
+- Unseasonal Growth
+- Bat Migration
+- Unearthed Graves
+- Bandit Hideout
+- Flooding
+- Weapon Cache
+- Local Celebration
+- Cave-In Survivors
+- Underworld Rising
+...
+---
+name: system_plots
+show: false
+format: "\t^"
+table:
+- Predatory Squatter
+- Den of Thieves
+- Buried Treasure
+- Unseasonal Growth
+- Bat Migration
+- Unearthed Graves
+- Bandit Hideout
+- Flooding
+- Weapon Cache
+- Local Celebration
+- Cave-In Survivors
+- Underworld Rising
+...
+# Further details for certain terrain elements. Note that many of these
+# are broken down into sub-tables: "waterway_access" is composed of
+# "waterway_access_source" and "waterway_access_depth", for example.
+# Many sub-tables had six entries chosen with a 1d6 roll - these are
+# often entered as YAML flow sequences for brevity.
+---
+name: mineral_deposits
+show: false
+format: "Mineral Deposits (^)"
+table:
+- ['coarse base', 'clays and workable material', 'salts', 'reactant elements', 'hazardous elements', 'rare ores']
+...
+---
+name: waterway_access
+show: false
+format: "Waterway Access (^)"
+table:
+- ^waterway_access_source^, ^waterway_access_depth^
+...
+---
+name: waterway_access_source
+show: false
+format: '^'
+table:
+- ['spring', 'underground river', 'man-made well', 'underground lake', 'waterfall', 'runoff flow']
+...
+---
+name: waterway_access_depth
+show: false
+format: "depth ^ ft."
+table:
+- ['$2d6$', '$1d6*3$', '$2d6*5$', '$1d6*10$', '$1d4*3$', '$1d2*5$']
+...
+---
+name: stalagmite_field
+show: false
+format: "Stalagmite Field (^)"
+table:
+- ^stalagmite_field_area^, ^stalagmite_field_height^
+...
+---
+name: stalagmite_field_area
+show: false
+format: "area ^ sq. ft."
+table:
+- $2d6*50$
+...
+---
+name: stalagmite_field_height
+show: false
+format: "average height ^"
+table:
+- $2d6$ in.
+- $2d8*2$ in.
+- $1d3$ ft.
+- $2d3$ ft.
+- $1d6+4$ ft.
+- $2d6+2$ ft.
+...
+---
+name: stalactite_overhang
+show: false
+format: "Stalactite Overhang (^)"
+table:
+- ^stalactite_overhang_area^, ^stalactite_overhang_length^
+...
+---
+name: stalactite_overhang_area
+show: false
+format: "area ^ sq. ft."
+table:
+- $2d6*10$
+...
+---
+name: stalactite_overhang_length
+show: false
+format: "average length ^"
+table:
+- $3d6$ in.
+- $3d8*2$ in.
+- $1d6$ ft.
+- $2d4$ ft.
+- $1d8+4$ ft.
+- $2d6+4$ ft.
+...
+---
+name: traps
+show: false
+format: "Traps (^)"
+table:
+- ^trap_type^
+...
+---
+name: trap_type
+show: false
+repeat: $num_traps$
+format: "^, "
+table:
+- spring-blade
+- false floor
+- falling weight
+- thrusting spike
+- spinning hook
+- ["launched arrows", "launched darts"]
+...
+---
+name: burial_chamber
+show: false
+format: "Burial Chamber (^)"
+table:
+- ^burial_chamber_remains^, ^burial_chamber_treasure_chance^ ^burial_chamber_treasure_worth^
+---
+name: burial_chamber_remains
+show: false
+format: '^'
+table:
+- [fresh, recent, decrepit, venerable, bones, ashes]
+...
+---
+name: burial_chamber_treasure_chance
+show: false
+format: "^ chance of treasure"
+table:
+- ['50%', '25%', '20%', '10%', '5%', '1%']
+...
+---
+name: burial_chamber_treasure_worth
+show: false
+format: "worth ^ silver pieces"
+table:
+- ['$1d4*10$', '$1d6*50$', '$2d6*100$', '$2d6*200$', '$2d6*500$', '$2d6*1000$']
+...
+---
+name: previous_exploration_materials
+show: false
+format: "Previous Exploration Materials (^)"
+table:
+- ^pem_amount^ ^pem_condition^ ^pem_item^
+...
+---
+name: pem_amount
+show: false
+format: '^'
+table:
+- [1, $1d3$, $1d6$, $2d4$, $2d6$, $2d8$]
+...
+---
+name: pem_condition
+show: false
+format: '^'
+table:
+- ['brand new/undamaged', 'heavily used', 'slightly damaged', 'heavily damaged', 'broken but repairable', 'rotten/destroyed']
+...
+---
+name: pem_item
+show: false
+format: '^'
+table:
+- 25 feet of rope with pitons
+- box of rations
+- flask of lamp oil
+- miner's pickaxe
+- shovel
+- bedroll
+...
+---
+name: reliquary
+show: false
+format: "Reliquary (^)"
+table:
+- ^reliquary_type^, $2d6*5$ ft. by $2d6*5$ ft., ^reliquary_artefact_chance^ ^reliquary_artefact_worth^
+...
+---
+name: reliquary_type
+show: false
+format: '^'
+table:
+- ['new', 'recently visited', 'recently abandoned', 'old and vacant', 'long forgotten', 'ancient']
+...
+---
+name: reliquary_artefact_chance
+show: false
+format: "^ chance of artefact "
+table:
+- ['75%', '50%', '25%', '10%', '5%', '1%']
+...
+---
+name: reliquary_artefact_worth
+show: false
+format: "worth ^ silver pieces"
+table:
+- ['$1d4*100$', '$1d6*500$', '$2d6*1000$', '$2d6*2000$', '$2d6*5000$', '$2d6*10000']
+...
+---
+name: dangerous_growth
+show: false
+format: "Dangerous Growth (^)"
+table:
+- ^dangerous_growth_type^, ^dangerous_growth_coverage^
+...
+---
+name: dangerous_growth_type
+show: false
+format: '^'
+table:
+- ['slime mold', 'spore mould', 'lichen', 'moss', 'ferns', 'vines']
+...
+---
+name: dangerous_growth_coverage
+show: false
+format: "^ ft."
+table:
+- ['$1d3*5$', '$1d6*5$', '$1d3*10$', '$1d6*10$', '$2d3*15$', '$2d6*15$']
+...
+---
+name: poisonous_growth
+show: false
+format: "Poisonous Growth (^)"
+table:
+- ^poisonous_growth_type^, ^poisonous_growth_coverage^
+...
+---
+name: poisonous_growth_type
+show: false
+format: '^'
+table:
+- ['slime mold', 'spore mould', 'mushroom', 'moss', 'flowering stalk', 'hanging vines']
+...
+---
+name: poisonous_growth_coverage
+show: false
+format: "^ ft."
+table:
+- ['$1d3*5$', '$1d6*5$', '$1d4*10$', '$1d6*10$', '$2d4*15$', '$2d6*15$']
+...
+---
+name: useful_growth
+show: false
+format: "Useful Growth (^)"
+table:
+- ^useful_growth_type^, ^useful_growth_coverage^, ^useful_growth_quirk^
+...
+---
+name: useful_growth_type
+show: false
+format: '^'
+table:
+- ['slime mold', 'mushrooms', 'lichen', 'moss', 'ferns', 'flowers']
+...
+---
+name: useful_growth_coverage
+show: false
+format: "^ sq. ft."
+table:
+- ['$1d2*10$', '$1d3*10$', '$1d4*10$', '$1d6*10$', '$1d18*10$', '$1d10*10$']
+...
+---
+name: useful_growth_quirk
+show: false
+format: '^'
+table:
+- water for $1d3$ days
+- food for $1d6$ days
+- heals $1d3$ damage
+- restores 1 damaged ability
+- restores $1d3$ damaged abilities
+- cures any natural poison, toxin or venom
+...
+---
+name: parasitical
+show: false
+format: "Parasitical (^)"
+table:
+- ^parasitical_type^, ^parasitical_population^^parasitical_quirk^
+...
+---
+name: parasitical_type
+show: false
+format: '^'
+table:
+- amoebic
+- [worm, slug, leech]
+- insect
+- flying insect
+...
+---
+name: parasitical_population
+show: false
+format: "pop. ^"
+table:
+- ['$1d6*100$', '$2d6*100$', '$2d6*1000$', '$2d6*5000$']
+...
+---
+name: parasitical_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", can be eaten as a nutritious but foul-tasting meal"
+- ", the middle life-stage of a larger predatory animal"
+- ", suicidally attracted to any heat source, including fire"
+...
+---
+name: burrowing
+show: false
+format: "Burrowing (^)"
+table:
+- ^burrowing_type^, ^burrowing_population^^burrowing_quirk^
+...
+---
+name: burrowing_type
+show: false
+format: '^'
+table:
+- amoebic slime
+- worm
+- insect
+- crustacean
+- reptile
+- mammal
+...
+---
+name: burrowing_population
+show: false
+format: "pop. ^"
+table:
+- ['$1d3*100$', '$1d6*100$', '$2d6*100$', '$2d6*500$', '$2d6*1000$', '$2d6*5000$']
+...
+---
+name: burrowing_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", medium sized, +25% chance of cave-ins"
+- ", can be eaten as a nutritious but foul-tasting meal"
+- ", possesses dangerous self-defence toxins in its flesh"
+- ", suicidally attracted to any heat source, including fire"
+- ", large sized, +50% chance of cave-ins"
+- ", naturally venomous and predatory"
+...
+---
+name: aerial
+show: false
+format: "Aerial (^)"
+table:
+- ^aerial_type^, ^aerial_population^^aerial_quirk^
+...
+---
+name: aerial_type
+show: false
+format: '^'
+table:
+- [moth, lacewing]
+- insect
+- reptile
+- avian
+- gliding mammal
+- flying mammal
+...
+---
+name: aerial_population
+show: false
+format: "pop. ^"
+table:
+- ['$1d6*100$', '$1d6*200$', '$2d6*500$', '$2d6*1000$', '$2d6*5000$', '$2d6*10000$']
+...
+---
+name: aerial_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", medium sized, slow"
+- ", can be eaten as a nutritious but foul-tasting meal"
+- ", has perfect sonar and blind sight"
+- ", small sized, fast"
+- ", naturally venomous and predatory"
+...
+---
+name: crawling
+show: false
+format: "Crawling (^)"
+table:
+- ^crawling_type^, ^crawling_population^^crawling_quirk^
+...
+---
+name: crawling_type
+show: false
+format: '^'
+table:
+- amoebic slime
+- insect
+- [amphibian, fish]
+- serpent
+- lizard
+- mammal
+...
+---
+name: crawling_population
+show: false
+format: "pop. ^"
+table:
+- ['$1d2*100$', '$1d4*100$', '$1d6*100$', '$2d6*100$', '$2d6*500$', '$2d6*2000$']
+...
+---
+name: crawling_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", medium sized"
+- ", waste is prodigious and slick"
+- ", can be eaten as a nutritious but foul-tasting meal"
+- ", naturally predatory with lethal natural weaponry"
+- ", naturally venomous and predatory"
+...
+---
+name: large_creature
+show: false
+format: "Large Creature (^)"
+table:
+- ^large_creature_type^, ^large_creature_population^^large_creature_quirk^
+...
+---
+name: large_creature_type
+show: false
+format: '^'
+table:
+- amoebic slime
+- worm
+- insect
+- [amphibian, fish]
+- reptile
+- mammal
+...
+---
+name: large_creature_population
+show: false
+format: "pop. ^"
+table:
+- ['$1d2*10$', '$1d4*10$', '$1d6*10$', '$2d6*10$', '$2d6*25$', '$2d6*50$']
+...
+---
+name: large_creature_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", waste is prodigious and slick"
+- ", can be eaten as a nutritious but foul-tasting meal"
+- ", advanced intelligence with problem-solving"
+- ", naturally venomous and predatory"
+...
+---
+name: subterranean
+show: false
+format: "Subterranean (^)"
+table:
+- ^subterranean_type^, ^subterranean_population^, ^subterranean_depth^^subterranean_quirk^
+...
+---
+name: subterranean_type
+show: false
+format: '^'
+table:
+- amoebic slime
+- worm
+- insect
+- crustacean
+- [amphibian, fish]
+- reptile
+...
+---
+name: subterranean_population
+show: false
+format: "pop. ^"
+table:
+- ['$1d4*5$', '$1d6*5$', '$1d4*10$', '$1d6*10$', '$2d6*20$', '$2d6*40$']
+...
+---
+name: subterranean_depth
+show: false
+format: "found below ^ ft."
+table:
+- ['50', '100', '200', '500', '750', '1000']
+...
+---
+name: subterranean_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", produces bioluminescence equal to a simple torch"
+- ", can be eaten as a nutritious but foul-tasting meal"
+- ", has perfect sonar and blind sight"
+- ", naturally venomous and/or toxic"
+- ", has a secondary trait"
+...
+---
+name: gemstone_field
+show: false
+format: "Gemstone Field (^)"
+table:
+- ^gemstone_field_type^, ^gemstone_field_value^
+...
+---
+name: gemstone_field_type
+show: false
+format: '^'
+table:
+- [Quartz, Onyx, Turqoise, Diamonds, Emeralds, Opals, Rubies, Sapphires,
+'Unknown Gem']
+...
+---
+name: gemstone_field_value
+show: false
+format: "^ silver pieces per man-day"
+table:
+- ['$1d6*50$', '$1d8*50$', '$1d10*100$', '$2d6*100$', '$2d6*200$', '$2d10*200$']
+...
+---
+name: underground_lake
+show: false
+format: "Underground Lake (^)"
+table:
+- ^underground_lake_area^, ^underground_lake_depth^^underground_lake_quirk^
+...
+---
+name: underground_lake_area
+show: false
+format: "^ sq. ft."
+table:
+- ['$2d10*5$', '$2d10*10$', '$3d10*10$', '$4d10*10$', '$5d10*10$', '$5d10*20$']
+...
+---
+name: underground_lake_depth
+show: false
+format: "^ ft."
+table:
+- ['$1d4*3$', '$1d4*5$', '$1d6*5$', '$1d8*5$', '$1d10*5$', '$2d6*5$']
+...
+---
+name: underground_lake_quirk
+show: false
+format: '^'
+table:
+- ' '
+- ", very cold waters"
+- ", jagged shore inflicts $1d3$ damage to anyone falling/crawling upon it"
+- ", carnivorous fauna"
+- ", sulphurous waters"
+- ", toxic waters"
+...
+---
+name: underground_river
+show: false
+format: "Underground River (^)"
+table:
+- width $2d6*3$ ft., ^underground_river_depth^
+...
+---
+name: underground_river_depth
+show: false
+format: "^ ft."
+table:
+- ['$1d4*2$', '$1d4*3$', '$1d6*3$', '$1d6*5$', '$1d8*5$', '$1d10*3$']
+...

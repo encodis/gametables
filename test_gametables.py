@@ -113,7 +113,7 @@ def test_gamecards_stdout(tmpdir, capsys):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  line 1
 -  line 2
@@ -248,12 +248,12 @@ table:
     assert actual == expect
 
 
-def test_gamecards_heading(tmpdir):
+def test_gamecards_header(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-heading: true
+header: "a test\\n"
 table:
 -  line 1
 ''')
@@ -266,7 +266,33 @@ table:
     assert os.path.exists(out_file)
 
     # assert contents of output file has heading same as title
-    expect = 'test\nline 1\n'
+    expect = 'a test\nline 1\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
+def test_gamecards_footer(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test
+footer: "\\ndone!"
+table:
+-  line 1
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has heading same as title
+    expect = 'line 1\n\ndone!'
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()
@@ -292,7 +318,7 @@ table:
     assert os.path.exists(out_file)
 
     # assert contents of output file has default format
-    expect = 'foo line 1\n'
+    expect = 'foo line 1'
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()
@@ -360,7 +386,6 @@ def test_gamecards_lookup_2d6(tmpdir):
 name: test
 lookup: $2d6$
 table:
--  1 __
 -  2-7 first
 -  8-11 second
 -  12 third
@@ -382,12 +407,51 @@ table:
     assert actual in expect
 
 
+def test_gamecards_lookup_fixed(tmpdir):
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test0
+format: '^'
+table:
+-  Line 1^test1^
+...
+---
+name: test1
+show: false
+table:
+-  $val=2$
+...
+---
+name: test2
+format: '^'
+lookup: $val$
+table:
+- 1 Line 1
+- 2 Line 2
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file has specified format
+    expect = 'Line 1\nLine 2'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
 def test_gamecards_format(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-format: foo ^ bar
+format: "foo ^ bar\\n"
 table:
 -  line 1
 ''')
@@ -408,32 +472,6 @@ table:
     assert actual == expect
 
 
-def test_gamecards_heading_alt(tmpdir):
-
-    yaml_file = tmpdir.join('tables.yaml')
-    yaml_file.write(f'''---
-name: test
-heading: foo
-table:
--  line 1
-''')
-
-    out_file = tmpdir.join('tables.txt')
-
-    gametables(yaml_file, out_file)
-
-    # assert correct output files exist
-    assert os.path.exists(out_file)
-
-    # assert contents of output file has heading as supplied
-    expect = 'foo\nline 1\n'
-
-    with open(out_file, 'r', encoding='utf8') as fh:
-        actual = fh.read()
-
-    assert actual == expect
-
-
 def test_gamecards_link(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
@@ -445,7 +483,7 @@ table:
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  line 2
 ''')
@@ -477,14 +515,14 @@ table:
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  line 2
 ...
 ---
 name: test 3
 show: false
-newline: false
+format: '^'
 table:
 -  line 3
 ''')
@@ -510,7 +548,7 @@ def test_gamecards_link_weighted(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-newline: false
+format: '^'
 table:
 - 2* ^test2^
 - 2* ^test 3^
@@ -518,14 +556,14 @@ table:
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  line 2
 ...
 ---
 name: test 3
 show: false
-newline: false
+format: '^'
 table:
 -  line 3
 ''')
@@ -557,14 +595,14 @@ table:
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  ^test 3^
 ...
 ---
 name: test 3
 show: false
-newline: false
+format: '^'
 table:
 -  line 3
 ''')
@@ -597,7 +635,7 @@ table:
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  line 1
 -  line 2
@@ -624,7 +662,7 @@ def test_gamecards_link_inline_repeat(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-newline: false
+format: '^'
 table:
 -  ^test2^
 ...
@@ -632,7 +670,6 @@ table:
 name: test2
 show: false
 repeat: 2
-newline: true
 table:
 -  line 2
 ''')
@@ -664,14 +701,14 @@ table:
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  ^test 3^
 ...
 ---
 name: test 3
 show: false
-newline: false
+format: '^'
 table:
 -  ^test2^
 ''')
@@ -697,21 +734,21 @@ def test_gamecards_link_inline(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-newline: false
+format: '^'
 table:
 -  ['^test2^', '^test3^']
 ...
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  line 2
 ...
 ---
 name: test3
 show: false
-newline: false
+format: '^'
 table:
 -  line 3
 ''')
@@ -737,7 +774,7 @@ def test_gamecards_dice(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  $1d6$
 ''')
@@ -763,7 +800,7 @@ def test_gamecards_dice_multiple(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  $1d2$ and $1d2$
 ''')
@@ -789,7 +826,7 @@ def test_gamecards_dice_plus(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  $1d6+1$
 ''')
@@ -815,7 +852,7 @@ def test_gamecards_dice_minus(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  $1d6-1$
 ''')
@@ -841,7 +878,7 @@ def test_gamecards_dice_multiply(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  $1d3*2$
 ''')
@@ -867,7 +904,7 @@ def test_gamecards_dice_divide(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  $1d3/3$
 ''')
@@ -888,12 +925,39 @@ table:
     assert actual in expect
 
 
+def test_gamecards_dice_complex(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test
+format: '^'
+vars: $num=2$
+table:
+-  $1d3+num-1$
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = '234'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual in expect
+
+
 def test_gamecards_dice_inline_list(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
-newline: false
+format: '^'
 table:
 -  [$1d6$, $1d6$]
 ''')
@@ -919,13 +983,13 @@ def test_gamecards_vars(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-newline: false
+format: '^'
 table:
--  $foo=bar$ Line ^test2^
+-  $foo=1$ Line ^test2^
 ...
 ---
 name: test2
-newline: false
+format: '^'
 show: false
 table:
 -  Foo = $foo$
@@ -939,7 +1003,7 @@ table:
     assert os.path.exists(out_file)
 
     # assert contents of output file in range of dice
-    expect = 'Line Foo = bar'
+    expect = 'Line Foo = 1'
 
     with open(out_file, 'r', encoding='utf8') as fh:
         actual = fh.read()
@@ -959,7 +1023,7 @@ table:
 ...
 ---
 name: test2
-newline: false
+format: '^'
 table:
 -  Foo = $foo$, Bar = $bar$
 ''')
@@ -1016,14 +1080,14 @@ def test_gamecards_vars_link(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-variables: $foo=2$
+vars: $foo=2$
 table:
 -  Line 1 ^test$foo$^
 ...
 ---
 name: test2
 show: false
-newline: false
+format: '^'
 table:
 -  Line 2
 ''')
@@ -1043,33 +1107,67 @@ table:
 
     assert actual == expect
 
+
+def test_gamecards_vars_link_str(tmpdir):
+
+    yaml_file = tmpdir.join('tables.yaml')
+    yaml_file.write(f'''---
+name: test1
+vars: $foo_1=bar_4$
+table:
+-  Line 1 ^test_$foo_1$^
+...
+---
+name: test_bar_4
+show: false
+format: '^'
+table:
+-  Line 2
+''')
+
+    out_file = tmpdir.join('tables.txt')
+
+    gametables(yaml_file, out_file)
+
+    # assert correct output files exist
+    assert os.path.exists(out_file)
+
+    # assert contents of output file in range of dice
+    expect = 'Line 1 Line 2\n'
+
+    with open(out_file, 'r', encoding='utf8') as fh:
+        actual = fh.read()
+
+    assert actual == expect
+
+
 def test_gamecards_vars_dice(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test0
-variables: $foo=$1d3$$
-newline: false
+vars: $foo=1d3$
+format: '^'
 table:
 -  ^test$foo$^
 ...
 ---
 name: test1
-newline: false
+format: '^'
 show: false
 table:
 -  Line 1
 ...
 ---
 name: test2
-newline: false
+format: '^'
 show: false
 table:
 -  Line 2
 ...
 ---
 name: test3
-newline: false
+format: '^'
 show: false
 table:
 -  Line 3

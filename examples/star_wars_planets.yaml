@@ -1,0 +1,176 @@
+# From "Star Wars Roleplaying Game: Revised, Expanded, Updated"
+---
+name: planet_function
+header: "Star Wars Planet\n\n" 
+format: "Function:     ^\n"
+vars: $starport_mod=0$ $tech_level_mod=0$ $atmosphere_mod=0$
+table:
+- Abandoned Colony
+- Academic $starport_mod=+1$ $tech_level_mod=+1$
+- Administrative/Government $starport_mod=+1$ $tech_level_mod=+1$
+- 8* Agriculture
+- Colony
+- Disaster $starport_mod=-3$ $tech_level_mod=-2$ $atmosphere_mod=+3$
+- Entertainment
+- 2* Exploration $starport_mod=-2$ $tech_level_mod=-2$
+- Hidden Base
+- 2* Homeworld
+- Luxury Goods
+- 7* Manufacturing/Processing $starport_mod=+2$ $tech_level_mod=+2$
+- Military $starport_mod=+3$ $tech_level_mod=+2$
+- 4* Mining $starport_mod=+2$ $tech_level_mod=+1$
+- 5* Natural Resources
+- Research
+- Service $starport_mod=+1$ $tech_level_mod=+2$
+- 2* Subsistence
+- 3* Trade $starport_mod=+3$ $tech_level_mod=+2$
+...
+---
+name: government
+format: "Government:   ^\n"
+table:
+- Alliance/Federation
+- Anarchy
+- 4* Competing States
+- 2* Corporate Owned $starport_mod=+3$ $tech_level_mod=+2$
+- 2* Dictatorship
+- Family
+- 6* Feudalism
+- Guild/Professional Organizations
+- 10* Imperial Governor
+- 3* Military
+- 7* Monarchy
+- Organized Crime
+- Participatory Democracy
+- Rebel Alliance
+- Representative Democracy
+- Ruler by Selection/Rite
+- Theocracy
+- 4* Tribal
+...
+---
+name: planet_type
+format: "Planet Type:  ^\n"
+lookup: $2d6$
+vars: $population_mod=0$
+table:
+- 2-9 Terrestrial
+- 10 Satellite
+- 11 Asteroid Belt $population_mod=-2$
+- 12 Artificial $population_mod=-2$
+...
+---
+name: terrain
+format: "Terrain:      ^\n"
+table:
+- Barren $population_mod=-2$ $atmosphere_mod=+3$
+- 2* Cave $population_mod=-2$ $atmosphere_mod=+2$
+- Crater Field
+- 2* Desert
+- 4* Forest
+- 2* Glacier
+- 2* Jungle
+- 2* Mountain
+- 7* Ocean $population_mod=-1$
+- 3* Plain
+- 2* Plateau
+- 2* Urban $population_mod=+1$
+- 8* Wetlands
+- 2* Volcanic $population_mod=-2$ $atmosphere_mod=+3$
+- 2* Special
+...
+---
+name: temperature
+format: "Temperature:  ^\n"
+lookup: $2d6$
+table:
+- 2 Searing
+- 3-4 Hot
+- 5-9 Temperate
+- 10-11 Cool 
+- 12 Frigid
+...
+---
+name: gravity
+format: "Gravity:      ^\n"
+lookup: $2d6$
+table:
+- 2 Zero
+- 3-4 Light $atmosphere_mod=+2$
+- 5-11 Standard
+- 12 Heavy $atmosphere_mod=+2$
+...
+---
+name: atmosphere
+format: "Atmosphere:   ^\n"
+lookup: $2d6+atmosphere_mod$
+table:
+- 2 None
+- 3-9 Type I (breathable)
+- 10 Type II (breath mask suggested)
+- 11 Type III (breath mask required)
+- 12 Type IV (environment suit required)
+...
+---
+name: hydrosphere
+format: "Hydrosphere:  ^\n"
+lookup: $2d6$
+table:
+- 2 Arid
+- 3-4 Dry
+- 5-9 Moderate
+- 10-11 Moist
+- 12 Saturated
+...
+---
+name: day_length
+format: "Day Length:   ^ standard hours\n"
+table:
+- 2* $2d6+10$
+- 2* $1d6+20$
+- $1d6+25$
+- $1d6+30$
+...
+---
+name: year_length
+format: "Year Length:  ^ local days\n"
+table:
+- $(1d6*15)+75$
+- $(1d6*15)+150$
+- 2* $(1d6*15)+225$
+- $(1d6*15)+300$
+- $(1d6*15)+375$
+...
+---
+name: starport
+format: "Starport:     ^\n"
+lookup: $2d6+starport_mod$
+table:
+- 2 Landing field
+- 3-5 Limited services
+- 6-8 Standard class
+- 9-11 Stellar class
+- 12 Imperial/Republic class
+...
+---
+name: population
+format: "Population:   ^\n"
+lookup: $1d6+population_mod$
+table:
+- 1 $1d9*1d999 + (1d9 * 10 ^ (1d3-1) * 100)$
+- 2-3 $1d9 * 1000 + (1d9 * (10^(1d3-1)) * 100)$
+- 4-5 $1d9*1000000 + (1d9 * 10 ^ (1d3-1) * 100000)$
+- 6 $1d9*1000000000 + (1d9 * 10 ^ (1d3-1) * 100000000)$
+...
+---
+name: tech_level
+format: "Tech Level:   ^\n"
+lookup: $2d6+tech_level_mod$
+table:
+- 2 Stone
+- 3 Feudal
+- 4 Industrial
+- 5 Atomic
+- 6-7 Information
+- 8-12 Hyperspace
+...
