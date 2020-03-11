@@ -447,17 +447,13 @@ $ python setup.py bdist_wheel
 
 - Catch more YAML and expression parser exceptions
 - Warn of unknown YAML fields
-- Warning of duplicate table names
-- Option line option to roll multiple times, with separators (-r, --repeat, --separator)
-- Option to report RNG seed, and to use it to replicate a table (--seed, --seed=XXX)
 - Option to dump YAML file in Markdown format (--dump)
-- Option for changing recursion limit (--max-recursion)
 - Option to toggle integer formatting (--integer)
-- Options for tables to run without output (so variables will be set etc)
+- Options for tables to run without output (like show: false but with variables being set etc)
 - Read a folder of YAML files (would have to define order)
 - Read a zip file of YAML files
 - Overall headers and footers (possible as template files)
-- Warning of overwriting existing variables
+- Warning of overwriting existing variables, with option to allow/deny?
 - For lookup tables, check ranges are consistent
 - Functionality to set up a library of files, then roll a table by name (not file itself)
 - More formatting options, ideally for input to something like Pandoc

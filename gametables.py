@@ -19,6 +19,8 @@ from py_expression_eval import Parser
 
 __version__ = '0.1.0'
 
+DEFAULT_MAX_LIMIT=20
+
 
 @dataclass
 class GameTable:
@@ -41,7 +43,7 @@ class GameTable:
     database: ClassVar[Dict[str, Any]] = {}
     variable: ClassVar[Dict[str, str]] = {}
     exparser: ClassVar[Parser] = Parser()
-    maxlimit: ClassVar[int] = 20
+    maxlimit: ClassVar[int] = DEFAULT_MAX_LIMIT
 
     dice_re: ClassVar[str] = r'(\d+)[dD](\d+)'
     expr_re: ClassVar[str] = r'\$([\w\s()+\-*/^]*)\$'
@@ -97,6 +99,9 @@ class GameTable:
         re.sub(GameTable.setvar_re, self.set_variable, self.vars)
 
         # add to database of all tables
+        if self.name != '_' and self.name in GameTable.database:
+            print(f'Duplicate table name {self.name}')
+
         GameTable.database[self.name] = self
 
     def result(self):
@@ -277,9 +282,12 @@ def roll_dice(dice):
     return str(total)
 
 
-def gametables(source, target, repeat=1):
+def gametables(source, target, repeat=1, separator='', maxlimit=DEFAULT_MAX_LIMIT, seed=''):
     '''Output tables from source file
     '''
+
+    if seed:
+        random.seed(seed)
 
     with open(source, 'r', encoding='utf8') as source_file:
         try:
@@ -311,6 +319,8 @@ def gametables(source, target, repeat=1):
 
         GameTable.sort()
 
+        GameTable.maxlimit = maxlimit
+
         # iterate list of GameTable keys because it might change during the loop if temp tables are added
         for table in list(GameTable.database):
 
@@ -323,7 +333,7 @@ def gametables(source, target, repeat=1):
 
         # if repeating, print separator
         if repeat > 1:
-            target_file.write('\n')
+            target_file.write(separator + '\n')
 
     if target_file is not sys.stdout:
         target_file.close()
@@ -336,13 +346,22 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
 
-    parser = argparse.ArgumentParser(description="Randomly choose an entry from a sequence in a YAML file")
-    parser.add_argument("source", help="Source file (YAML)")
-    parser.add_argument('--target', nargs='?', default='', help="Target file (text)")
-    parser.add_argument("--repeat", type=int, default=1, help="Repeat run")
+    parser = argparse.ArgumentParser(description='Randomly choose an entry from a sequence in a YAML file')
+    parser.add_argument('source', help='Source file (YAML)')
+    parser.add_argument('--target', nargs='?', default='', help='Target file (text)')
+    parser.add_argument('-r', '--repeat', type=int, default=1, help='Repeat run')
+    parser.add_argument('-s', '--separator', type=str, default='', help='Repeat separator')
+    parser.add_argument('-m', '--maxlimit', type=int, default=DEFAULT_MAX_LIMIT, help='Max recursion limit per table')
+    parser.add_argument('--seed', type=str, default='', help='Seed for random number generator')
     args = parser.parse_args(args)
     
-    gametables(args.source, args.target, args.repeat)
+    gametables(args.source,
+               args.target,
+               repeat=args.repeat,
+               separator=args.separator,
+               maxlimit=args.maxlimit,
+               seed=args.seed)
+
 
 if __name__ == "__main__":
     main()
