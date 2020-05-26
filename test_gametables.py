@@ -6,6 +6,7 @@ import pytest
 
 from gametables import gametables
 
+# TODO test repeat, separator etc
 
 def test_gamecards(tmpdir):
 
@@ -931,7 +932,7 @@ def test_gamecards_dice_complex(tmpdir):
     yaml_file.write(f'''---
 name: test
 format: '^'
-vars: $num=2$
+variables: $num=2$
 table:
 -  $1d3+num-1$
 ''')
@@ -1017,7 +1018,7 @@ def test_gamecards_vars_metadata(tmpdir):
     yaml_file.write(f'''---
 name: test1
 show: false
-vars: $foo=1$ $bar=2$
+variables: $foo=1$ $bar=2$
 table:
 -  N/A
 ...
@@ -1080,7 +1081,7 @@ def test_gamecards_vars_link(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-vars: $foo=2$
+variables: $foo=2$
 table:
 -  Line 1 ^test$foo$^
 ...
@@ -1113,7 +1114,7 @@ def test_gamecards_vars_link_str(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test1
-vars: $foo_1=bar_4$
+variables: $foo_1=bar_4$
 table:
 -  Line 1 ^test_$foo_1$^
 ...
@@ -1146,7 +1147,7 @@ def test_gamecards_vars_dice(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test0
-vars: $foo=1d3$
+variables: $foo=1d3$
 format: '^'
 table:
 -  ^test$foo$^

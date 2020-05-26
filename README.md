@@ -218,17 +218,17 @@ table:
 -  hobgoblins
 ```
 
-#### vars
+#### variables
 
 A string containing any number of variable assignments (see below). This parameter will be evaluated when the table is read (in fact, when *all* the tables are read) so it can be used to set up variables for use elsewhere. Note that dice rolls are evaluated *before* the variables are set so:
 
 ```
-vars: $num=1d6$
+variables: $num=1d6$
 ```
 
 will set `num` to a value between 1 and 6. 
 
-Note that the `vars` field of each table is read and evaluated in the order they are read, so it is quite possible to overwrite variables. This field is useful when using modifiers to lookup rolls, as it can be used to set default values.
+Note that the `variables` field of each table is read and evaluated in the order they are read, so it is quite possible to overwrite variables. This field is useful when using modifiers to lookup rolls, as it can be used to set default values.
 
 ### Table Links
 
@@ -270,7 +270,7 @@ Table entries can contain simple arithmetic expressions. Variables that have bee
 ```
 ---
 name: Wandering Monsters
-vars: $danger=1d4$
+variables: $danger=1d4$
 table:
 -  $1d6+1+danger$ goblins
 -  $1d4-1+danger$ orcs
@@ -278,12 +278,12 @@ table:
 -  $(2d6*2)+danger-1d4$ kobolds
 ```
 
-Dice rolls can also appear in the `vars` field as part of a variable definition, as well as the `lookup` field.
+Dice rolls can also appear in the `variables` field as part of a variable definition, as well as the `lookup` field.
 
 
 ### Variables
 
-Variables can be defined in the `vars` parameter, as described above. They can also be defined as part of a table entry, in which case they are set when that entry is output. 
+Variables can be defined in the `variables` parameter, as described above. They can also be defined as part of a table entry, in which case they are set when that entry is output. 
 
 Variables are set using the notation `$name=value$`. They are used simply using the name in an expression.
 
@@ -330,6 +330,7 @@ Others might need some work:
 Bone
 The Lost of Queen
 Fallen of Specter
+Circle of Ring
 ```
 
 although "Bone" is not a bad name for a Conan adventure!
@@ -446,7 +447,9 @@ $ python setup.py bdist_wheel
 ## To Do
 
 - Catch more YAML and expression parser exceptions
-- Warn of unknown YAML fields
+- Warn of unknown YAML fields?
+- Test literals, folded newlines and multi-line flow scalars
+- Functionality to set up a library of files, then roll a table by name (not file itself)
 - Option to dump YAML file in Markdown format (--dump)
 - Option to toggle integer formatting (--integer)
 - Options for tables to run without output (like show: false but with variables being set etc)
@@ -455,5 +458,4 @@ $ python setup.py bdist_wheel
 - Overall headers and footers (possible as template files)
 - Warning of overwriting existing variables, with option to allow/deny?
 - For lookup tables, check ranges are consistent
-- Functionality to set up a library of files, then roll a table by name (not file itself)
-- More formatting options, ideally for input to something like Pandoc
+- More formatting options, ideally for input to something like Pandoc? Or test have HTML header/footer

@@ -19,7 +19,7 @@ from py_expression_eval import Parser
 
 __version__ = '0.1.0'
 
-DEFAULT_MAX_LIMIT=20
+DEFAULT_MAX_LIMIT = 20
 
 
 @dataclass
@@ -35,7 +35,7 @@ class GameTable:
     format: str = '^\n'
     footer: str = ''
     repeat: Union[int, str] = 1
-    vars: str = ''
+    variables: str = ''
     _weights: List[str] = field(default_factory=list)
     _min_roll: int = -1
     _visits: int = 0
@@ -93,10 +93,10 @@ class GameTable:
             self.table = [self.del_weight(entry) for entry in self.table]
 
         # evaluate dice rolls in variables
-        self.vars = re.sub(GameTable.dice_re, roll_dice, self.vars)
+        self.variables = re.sub(GameTable.dice_re, roll_dice, self.variables)
 
         # set variables
-        re.sub(GameTable.setvar_re, self.set_variable, self.vars)
+        re.sub(GameTable.setvar_re, self.set_variable, self.variables)
 
         # add to database of all tables
         if self.name != '_' and self.name in GameTable.database:
@@ -256,7 +256,7 @@ class GameTable:
         # if var can be converted to float do so, else leave as string
         try:
             variable = float(GameTable.exparser.parse(variable).evaluate(GameTable.variable))
-        except Exception:
+        except:
             variable = var.group(2)
 
         cls.variable[var.group(1)] = variable
@@ -277,12 +277,10 @@ def roll_dice(dice):
     for _ in range(int(number)):
         total += random.randint(1, int(sides))
 
-    total = 0 if total < 0 else total
-
     return str(total)
 
 
-def gametables(source, target, repeat=1, separator='', maxlimit=DEFAULT_MAX_LIMIT, seed=''):
+def gametables(source, target='', repeat=1, separator='', maxlimit=DEFAULT_MAX_LIMIT, seed=''):
     '''Output tables from source file
     '''
 
@@ -303,7 +301,7 @@ def gametables(source, target, repeat=1, separator='', maxlimit=DEFAULT_MAX_LIMI
         # reset database
         GameTable.database = {}
 
-        # re-create database, so vars are correct
+        # re-create database, so variables are correct
         for table in raw_tables:
             GameTable(table.get('name'),
                       table.get('table'),
@@ -314,7 +312,7 @@ def gametables(source, target, repeat=1, separator='', maxlimit=DEFAULT_MAX_LIMI
                       table.get('format', '^\n'),
                       table.get('footer', ''),
                       table.get('repeat', 1),
-                      table.get('vars', '')
+                      table.get('variables', '')
                       )
 
         GameTable.sort()
@@ -354,9 +352,9 @@ def main(args=None):
     parser.add_argument('-m', '--maxlimit', type=int, default=DEFAULT_MAX_LIMIT, help='Max recursion limit per table')
     parser.add_argument('--seed', type=str, default='', help='Seed for random number generator')
     args = parser.parse_args(args)
-    
+
     gametables(args.source,
-               args.target,
+               target=args.target,
                repeat=args.repeat,
                separator=args.separator,
                maxlimit=args.maxlimit,
