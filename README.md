@@ -109,15 +109,13 @@ which would produce something similar to the following:
 orcs night
 ```
 
-> NOTE: entries can be quoted to include tabs etc but use double quotes XXX
-
 ### Table Specification
 
 The full specification for a table, with all the allowable options, is as follows:
 
 #### name
 
-The name of the table, as a string. This is used as a heading (if the `heading` parameter is set to 'True') and to reference the table via a link (see below). Names should be unique, but this is not enforced which might lead to odd results.
+The name of the table, as a string. This is used as a heading (if the `header` parameter is set to 'True') and to reference the table via a link (see below). Names should be unique, but this is not enforced which might lead to odd results.
 
 #### table
 

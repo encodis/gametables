@@ -3,7 +3,7 @@
 name: planet_function
 header: "Star Wars Planet\n\n" 
 format: "Function:     ^\n"
-vars: $starport_mod=0$ $tech_level_mod=0$ $atmosphere_mod=0$
+variables: $starport_mod=0$ $tech_level_mod=0$ $atmosphere_mod=0$
 table:
 - Abandoned Colony
 - Academic $starport_mod=+1$ $tech_level_mod=+1$
@@ -52,7 +52,7 @@ table:
 name: planet_type
 format: "Planet Type:  ^\n"
 lookup: $2d6$
-vars: $population_mod=0$
+variables: $population_mod=0$
 table:
 - 2-9 Terrestrial
 - 10 Satellite
