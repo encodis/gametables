@@ -283,7 +283,7 @@ def roll_dice(dice):
 def gametables(source, target='', repeat=1, separator='', maxlimit=DEFAULT_MAX_LIMIT, seed=''):
     '''Output tables from source file
     '''
-
+    # seed should be int
     if seed:
         random.seed(seed)
 
@@ -292,6 +292,7 @@ def gametables(source, target='', repeat=1, separator='', maxlimit=DEFAULT_MAX_L
             raw_tables = [t for t in yaml.safe_load_all(source_file)]
         except yaml.scanner.ScannerError:
             print(f'YAML format error in {source}')
+            # just return
             sys.exit()
 
     target_file = open(target, 'w', encoding='utf8') if target else sys.stdout

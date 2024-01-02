@@ -4,11 +4,11 @@
 import os
 import pytest
 
-from gametables import gametables
+from gametables.gametables import gametables
 
 # TODO test repeat, separator etc
 
-def test_gamecards(tmpdir):
+def test_gametables(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -34,7 +34,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_single(tmpdir):
+def test_gametables_single(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -59,7 +59,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_inline(tmpdir):
+def test_gametables_inline(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -84,7 +84,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_inline_weighted(tmpdir):
+def test_gametables_inline_weighted(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -109,7 +109,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_stdout(tmpdir, capsys):
+def test_gametables_stdout(tmpdir, capsys):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -130,7 +130,7 @@ table:
     assert captured.out in expect
 
 
-def test_gamecards_two(tmpdir):
+def test_gametables_two(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -160,7 +160,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_order(tmpdir):
+def test_gametables_order(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -192,7 +192,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_repeat(tmpdir):
+def test_gametables_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -218,7 +218,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_hide_one(tmpdir):
+def test_gametables_hide_one(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -249,7 +249,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_header(tmpdir):
+def test_gametables_header(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -275,7 +275,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_footer(tmpdir):
+def test_gametables_footer(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -301,7 +301,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_format_default(tmpdir):
+def test_gametables_format_default(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -327,7 +327,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_lookup(tmpdir):
+def test_gametables_lookup(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
@@ -354,7 +354,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_lookup_auto(tmpdir):
+def test_gametables_lookup_auto(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
@@ -381,7 +381,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_lookup_2d6(tmpdir):
+def test_gametables_lookup_2d6(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test
@@ -408,7 +408,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_lookup_fixed(tmpdir):
+def test_gametables_lookup_fixed(tmpdir):
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
 name: test0
@@ -447,7 +447,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_format(tmpdir):
+def test_gametables_format(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -473,7 +473,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_link(tmpdir):
+def test_gametables_link(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -505,7 +505,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_link_two(tmpdir):
+def test_gametables_link_two(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -544,7 +544,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_link_weighted(tmpdir):
+def test_gametables_link_weighted(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -585,7 +585,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_link_nested(tmpdir):
+def test_gametables_link_nested(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -625,7 +625,7 @@ table:
 
 
 @pytest.mark.skip(reason='Need to work out a way to test this properly')
-def test_gamecards_link_no_repeat(tmpdir):
+def test_gametables_link_no_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -658,7 +658,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_link_inline_repeat(tmpdir):
+def test_gametables_link_inline_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -691,7 +691,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_link_loop(tmpdir):
+def test_gametables_link_loop(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -730,7 +730,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_link_inline(tmpdir):
+def test_gametables_link_inline(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -770,7 +770,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice(tmpdir):
+def test_gametables_dice(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -796,7 +796,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_multiple(tmpdir):
+def test_gametables_dice_multiple(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -822,7 +822,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_plus(tmpdir):
+def test_gametables_dice_plus(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -848,7 +848,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_minus(tmpdir):
+def test_gametables_dice_minus(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -874,7 +874,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_multiply(tmpdir):
+def test_gametables_dice_multiply(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -900,7 +900,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_divide(tmpdir):
+def test_gametables_dice_divide(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -926,7 +926,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_complex(tmpdir):
+def test_gametables_dice_complex(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -953,7 +953,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_dice_inline_list(tmpdir):
+def test_gametables_dice_inline_list(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -979,7 +979,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_vars(tmpdir):
+def test_gametables_vars(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -1012,7 +1012,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_vars_metadata(tmpdir):
+def test_gametables_vars_metadata(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -1045,7 +1045,7 @@ table:
     assert actual in expect
 
 
-def test_gamecards_vars_repeat(tmpdir):
+def test_gametables_vars_repeat(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -1076,7 +1076,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_vars_link(tmpdir):
+def test_gametables_vars_link(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -1109,7 +1109,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_vars_link_str(tmpdir):
+def test_gametables_vars_link_str(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---
@@ -1142,7 +1142,7 @@ table:
     assert actual == expect
 
 
-def test_gamecards_vars_dice(tmpdir):
+def test_gametables_vars_dice(tmpdir):
 
     yaml_file = tmpdir.join('tables.yaml')
     yaml_file.write(f'''---

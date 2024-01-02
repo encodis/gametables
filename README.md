@@ -442,6 +442,14 @@ This will update the source file and the setup configuration. Then build the dis
 $ python setup.py bdist_wheel
 ```
 
+### Upload to PyPi
+
+Upload to the real package index as follows (or specify the latest distribution):
+
+```
+$ twine upload dist/*
+```
+
 ## To Do
 
 - Catch more YAML and expression parser exceptions
@@ -457,3 +465,4 @@ $ python setup.py bdist_wheel
 - Warning of overwriting existing variables, with option to allow/deny?
 - For lookup tables, check ranges are consistent
 - More formatting options, ideally for input to something like Pandoc? Or test have HTML header/footer
+- Add support for more complex dice expressions e.g. 1d6+1d4+2 etc
